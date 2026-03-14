@@ -1,28 +1,35 @@
 'use client'
 
 import { useMemo } from 'react'
-import { parseISO, format, startOfWeek, addDays, differenceInCalendarWeeks, eachWeekOfInterval } from 'date-fns'
+import { format, startOfWeek, addDays, eachWeekOfInterval } from 'date-fns'
 import type { DailyActivity } from '@/types/claude'
+import { useTheme } from '@/components/theme-provider'
 
 interface Props {
   data: DailyActivity[]
 }
 
-const SHADES = ['#1e2128', '#1e3a2f', '#16a34a', '#22c55e', '#86efac']
-
-function getShade(count: number, max: number): string {
-  if (count === 0) return SHADES[0]
-  const ratio = count / max
-  if (ratio < 0.2) return SHADES[1]
-  if (ratio < 0.4) return SHADES[2]
-  if (ratio < 0.7) return SHADES[3]
-  return SHADES[4]
-}
+// dark:  empty → dark gray → dim green → mid green → bright green
+const DARK_SHADES  = ['#1e2128', '#1e3a2f', '#16a34a', '#22c55e', '#86efac']
+// light: empty → very light green → soft green → medium green → vivid green
+const LIGHT_SHADES = ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127']
 
 const DAYS = ['', 'Mon', '', 'Wed', '', 'Fri', '']
 
 export function ActivityHeatmap({ data }: Props) {
-  const { weeks, maxCount, countMap } = useMemo(() => {
+  const { theme } = useTheme()
+  const shades = theme === 'dark' ? DARK_SHADES : LIGHT_SHADES
+
+  function getShade(count: number, max: number): string {
+    if (count === 0) return shades[0]
+    const ratio = count / max
+    if (ratio < 0.2) return shades[1]
+    if (ratio < 0.4) return shades[2]
+    if (ratio < 0.7) return shades[3]
+    return shades[4]
+  }
+
+  const { weeks, maxCount } = useMemo(() => {
     const countMap = new Map<string, number>()
     let maxCount = 0
     for (const d of data) {
@@ -32,9 +39,7 @@ export function ActivityHeatmap({ data }: Props) {
 
     const today = new Date()
     const startDate = startOfWeek(addDays(today, -52 * 7), { weekStartsOn: 0 })
-    const endDate = today
-
-    const weekStarts = eachWeekOfInterval({ start: startDate, end: endDate }, { weekStartsOn: 0 })
+    const weekStarts = eachWeekOfInterval({ start: startDate, end: today }, { weekStartsOn: 0 })
     const weeks = weekStarts.map(weekStart =>
       Array.from({ length: 7 }, (_, i) => {
         const d = addDays(weekStart, i)
@@ -43,7 +48,7 @@ export function ActivityHeatmap({ data }: Props) {
       })
     )
 
-    return { weeks, maxCount, countMap }
+    return { weeks, maxCount }
   }, [data])
 
   return (
@@ -61,15 +66,9 @@ export function ActivityHeatmap({ data }: Props) {
         {/* Week columns */}
         {weeks.map((week, wi) => (
           <div key={wi} className="flex flex-col gap-0.5">
-            {/* Month label on 1st of month */}
-            {week[0].date.getDate() <= 7 && (
-              <div className="h-3 text-[8px] text-muted-foreground/40 whitespace-nowrap">
-                {format(week[0].date, 'MMM')}
-              </div>
-            )}
-            {week[0].date.getDate() > 7 && (
-              <div className="h-3" />
-            )}
+            <div className="h-3 text-[8px] text-muted-foreground/40 whitespace-nowrap">
+              {week[0].date.getDate() <= 7 ? format(week[0].date, 'MMM') : ''}
+            </div>
             {week.map((day, di) => (
               <div
                 key={di}
@@ -85,7 +84,7 @@ export function ActivityHeatmap({ data }: Props) {
       {/* Legend */}
       <div className="flex items-center gap-1 mt-2">
         <span className="text-[13px] text-muted-foreground/40">less</span>
-        {SHADES.map((s, i) => (
+        {shades.map((s, i) => (
           <div key={i} className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: s }} />
         ))}
         <span className="text-[13px] text-muted-foreground/40">more</span>

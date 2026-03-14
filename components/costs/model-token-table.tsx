@@ -36,7 +36,7 @@ export function ModelTokenTable({ models }: Props) {
         </thead>
         <tbody>
           {models.map(m => (
-            <tr key={m.model} className="border-b border-border/30 hover:bg-[#141620]/50 transition-colors">
+            <tr key={m.model} className="border-b border-border/30 hover:bg-muted/50 transition-colors">
               <td className="py-2 text-foreground/80">{shortModel(m.model)}</td>
               <td className="py-2 text-right text-[#60a5fa]">{formatTokens(m.input_tokens)}</td>
               <td className="py-2 text-right text-[#d97706]">{formatTokens(m.output_tokens)}</td>

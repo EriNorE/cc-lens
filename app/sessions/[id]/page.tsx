@@ -42,7 +42,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ id: st
         <TopBar title="session replay" subtitle="loading..." />
         <div className="p-6 space-y-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className={`h-${i % 2 === 0 ? '16' : '24'} bg-[#141620] rounded animate-pulse`} />
+            <div key={i} className={`h-${i % 2 === 0 ? '16' : '24'} bg-muted rounded animate-pulse`} />
           ))}
         </div>
       </div>

@@ -11,7 +11,7 @@ export function StreakCard({ current, longest, totalActiveDays, mostActiveDay, m
     <div className="grid grid-cols-2 gap-3 text-[13px]">
       <div className="border border-border rounded p-3 bg-card">
         <p className="text-muted-foreground uppercase tracking-wider text-[12px] mb-1">Current Streak</p>
-        <p className="text-2xl font-bold text-[#d97706]">{current}</p>
+        <p className="text-2xl font-bold text-primary">{current}</p>
         <p className="text-muted-foreground/60 text-[12px]">consecutive days</p>
       </div>
       <div className="border border-border rounded p-3 bg-card">

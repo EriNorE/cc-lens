@@ -24,8 +24,8 @@ interface Props {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-[#1a1d26] border border-[#262a36] rounded-lg px-3 py-2 text-[13px]">
-      <p className="text-[#94a3b8] mb-1">{label}</p>
+    <div className="bg-card border border-border rounded-lg px-3 py-2 text-[13px]">
+      <p className="text-muted-foreground mb-1">{label}</p>
       {payload.map((p: { name: string; value: number; color: string }) => (
         <p key={p.name} style={{ color: p.color }}>
           {p.name}: <span className="font-bold">{p.value.toLocaleString()}</span>
@@ -99,10 +99,10 @@ export function UsageOverTimeChart({ data, days = 90, dateFrom, dateTo }: Props)
       <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-sm gap-1">
         <span>no data</span>
         {isFuture && (
-          <span className="text-[12px] text-[#5a6474]">(selected range is in the future)</span>
+          <span className="text-[12px] text-muted-foreground/60">(selected range is in the future)</span>
         )}
         {dateFrom && dateTo && !isFuture && (
-          <span className="text-[12px] text-[#5a6474]">(no activity in this date range)</span>
+          <span className="text-[12px] text-muted-foreground/60">(no activity in this date range)</span>
         )}
       </div>
     )
@@ -121,16 +121,16 @@ export function UsageOverTimeChart({ data, days = 90, dateFrom, dateTo }: Props)
             <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e2230" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 12, fill: '#7a8494' }}
+          tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
-          tick={{ fontSize: 12, fill: '#7a8494' }}
+          tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
           tickLine={false}
           axisLine={false}
           tickFormatter={v => v >= 1000 ? `${(v/1000).toFixed(0)}k` : String(v)}
@@ -139,7 +139,7 @@ export function UsageOverTimeChart({ data, days = 90, dateFrom, dateTo }: Props)
         <Legend
           wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
           formatter={(value) => (
-            <span style={{ color: '#94a3b8', fontSize: 12 }}>{value}</span>
+            <span style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>{value}</span>
           )}
         />
         <Area

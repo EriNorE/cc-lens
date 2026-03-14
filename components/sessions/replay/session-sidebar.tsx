@@ -82,7 +82,7 @@ export function SessionSidebar({ replay, meta }: Props) {
               return (
                 <div key={name} className="flex items-center gap-1.5">
                   <span className="text-muted-foreground w-24 truncate" title={name}>{shortName}</span>
-                  <div className="flex-1 bg-[#141620] rounded-sm h-1.5 overflow-hidden">
+                  <div className="flex-1 bg-muted rounded-sm h-1.5 overflow-hidden">
                     <div className="h-full bg-[#d97706]/60 rounded-sm" style={{ width: `${width}%` }} />
                   </div>
                   <span className="text-muted-foreground/60 w-6 text-right">{count}</span>

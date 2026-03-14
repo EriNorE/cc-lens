@@ -103,7 +103,7 @@ export default function ExportPage() {
                   type="date"
                   value={dateFrom}
                   onChange={e => setDateFrom(e.target.value)}
-                  className="bg-[#141620] border border-border rounded px-2 py-1 text-[13px] text-foreground outline-none focus:border-[#d97706]/50"
+                  className="bg-muted border border-border rounded px-2 py-1 text-[13px] text-foreground outline-none focus:border-primary/50"
                 />
               </div>
               <div>
@@ -112,7 +112,7 @@ export default function ExportPage() {
                   type="date"
                   value={dateTo}
                   onChange={e => setDateTo(e.target.value)}
-                  className="bg-[#141620] border border-border rounded px-2 py-1 text-[13px] text-foreground outline-none focus:border-[#d97706]/50"
+                  className="bg-muted border border-border rounded px-2 py-1 text-[13px] text-foreground outline-none focus:border-primary/50"
                 />
               </div>
             </div>
@@ -120,7 +120,7 @@ export default function ExportPage() {
             <button
               onClick={handleExport}
               disabled={exporting}
-              className="flex items-center gap-2 px-4 py-2 rounded bg-[#d97706] text-black text-[13px] font-bold hover:bg-[#d97706]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded bg-primary text-black text-[13px] font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {exporting ? '⏳ Exporting...' : '⬇ Download Export (.ccboard.json)'}
             </button>
@@ -142,12 +142,12 @@ export default function ExportPage() {
               onClick={() => fileRef.current?.click()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
                 dragging
-                  ? 'border-[#d97706] bg-[#d97706]/10'
-                  : 'border-border hover:border-[#d97706]/50 hover:bg-[#141620]/50'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
               }`}
             >
               <p className="text-[13px] text-muted-foreground">
-                Drag <code>.ccboard.json</code> here or <span className="text-[#d97706] hover:underline">click to browse</span>
+                Drag <code>.ccboard.json</code> here or <span className="text-primary hover:underline">click to browse</span>
               </p>
               <input
                 ref={fileRef}

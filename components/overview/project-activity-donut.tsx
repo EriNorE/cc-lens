@@ -29,7 +29,7 @@ function CustomTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null
   const { name, value } = payload[0]
   return (
-    <div className="bg-[#141620] border border-[#1e2230] rounded px-3 py-2 text-[13px]">
+    <div className="bg-card border border-border rounded px-3 py-2 text-[13px]">
       <p className="text-muted-foreground">{name}</p>
       <p className="text-foreground font-bold">{formatTokens(value)} tokens</p>
     </div>
@@ -86,7 +86,7 @@ export function ProjectActivityDonut({ projects }: Props) {
           iconSize={8}
           wrapperStyle={{ fontSize: 12 }}
           formatter={(value) => (
-            <span style={{ color: '#94a3b8', fontSize: 12 }}>{value}</span>
+            <span style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>{value}</span>
           )}
         />
       </PieChart>

@@ -24,7 +24,7 @@ function TokenBadge({ turn }: { turn: ReplayTurn }) {
   ].filter(Boolean).join(' ')
 
   return (
-    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-sm font-mono bg-[#141620] border border-border text-muted-foreground">
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-sm font-mono bg-muted border border-border text-muted-foreground">
       🪙 {parts}
       {turn.estimated_cost ? ` · ${formatCost(turn.estimated_cost)}` : ''}
     </span>
@@ -43,7 +43,7 @@ export function UserTurnCard({ turn, compactionBefore, toolResults }: TurnCardPr
           </span>
         </div>
         {turn.text && (
-          <div className="bg-[#141620]/80 border border-border/30 rounded-lg px-4 py-3">
+          <div className="bg-muted/50 border border-border/30 rounded-lg px-4 py-3">
             <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
               {turn.text}
             </p>
@@ -54,7 +54,7 @@ export function UserTurnCard({ turn, compactionBefore, toolResults }: TurnCardPr
             {turn.tool_results.map(r => (
               <div
                 key={r.tool_use_id}
-                className={`text-sm font-mono px-2.5 py-1.5 rounded border ${r.is_error ? 'bg-red-950/30 border-red-800/40 text-red-400' : 'bg-[#12141b]/50 border-border/30 text-muted-foreground/60'}`}
+                className={`text-sm font-mono px-2.5 py-1.5 rounded border ${r.is_error ? 'bg-red-950/30 border-red-800/40 text-red-400' : 'bg-muted/50 border-border/30 text-muted-foreground/60'}`}
               >
                 <span className="text-muted-foreground/40 mr-1">→</span>
                 {r.content.slice(0, 200)}{r.content.length > 200 ? '…' : ''}
@@ -77,7 +77,7 @@ export function AssistantTurnCard({ turn, turnNumber, toolResults }: TurnCardPro
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-        <span className="text-sm font-bold text-[#d97706]/80 uppercase tracking-wider">Claude</span>
+        <span className="text-sm font-bold text-primary/80 uppercase tracking-wider">Claude</span>
         <span className="text-sm text-muted-foreground/40">{modelShort}</span>
         <span className="text-sm text-muted-foreground/30">#{turnNumber}</span>
         {turn.turn_duration_ms && (

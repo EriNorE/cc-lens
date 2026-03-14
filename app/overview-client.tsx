@@ -40,7 +40,7 @@ function TStat({
   label,
   value,
   sub,
-  color = '#e8eaed',
+  color,
   size = 'lg',
 }: {
   label: string
@@ -51,15 +51,15 @@ function TStat({
 }) {
   return (
     <span className="inline-flex items-baseline gap-1.5 shrink-0">
-      <span className="text-[13px] text-[#7a8494] font-mono">{label}:</span>
+      <span className="text-[13px] text-muted-foreground font-mono">{label}:</span>
       <span
-        className="font-bold tabular-nums font-mono leading-none"
-        style={{ color, fontSize: size === 'lg' ? '26px' : '16px' }}
+        className="font-bold tabular-nums font-mono leading-none text-foreground"
+        style={{ color: color ?? undefined, fontSize: size === 'lg' ? '26px' : '16px' }}
       >
         {value}
       </span>
       {sub && (
-        <span className="text-[12px] text-[#5a6474] font-mono">{sub}</span>
+        <span className="text-[12px] text-muted-foreground/60 font-mono">{sub}</span>
       )}
     </span>
   )
@@ -76,7 +76,7 @@ function ChartCard({
 }) {
   return (
     <div className="border border-border rounded-lg bg-card p-5">
-      <h2 className="flex items-center gap-2 text-[13px] font-bold tracking-[0.18em] mb-4 font-mono text-[#7a8494] uppercase">
+      <h2 className="flex items-center gap-2 text-[13px] font-bold tracking-[0.18em] mb-4 font-mono text-muted-foreground uppercase">
         {icon}
         {title}
       </h2>
@@ -165,13 +165,13 @@ export function OverviewClient() {
         <TStat
           label="conversations"
           value={stats.totalMessages.toLocaleString()}
-          color="#e8eaed"
+          color={undefined}
         />
         <TStat
           label="claude sessions"
           value={computed.sessionCount.toLocaleString()}
           sub={`this month: ${computed.sessionsThisMonth} · this week: ${computed.sessionsThisWeek}`}
-          color="#e8eaed"
+          color={undefined}
         />
         <TStat
           label="tokens"
@@ -181,19 +181,19 @@ export function OverviewClient() {
         <TStat
           label="projects"
           value={String(projectCount)}
-          color="#e8eaed"
+          color={undefined}
         />
         <TStat
           label="storage"
           value={formatBytes(computed.storageBytes)}
-          color="#e8eaed"
+          color={undefined}
         />
       </div>
 
       {/* ── Date range ── */}
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <div className="flex items-center gap-3">
-          <label className="text-[13px] text-[#7a8494] font-mono">from:</label>
+          <label className="text-[13px] text-muted-foreground font-mono">from:</label>
           <input
             type="text"
             value={dateFrom}
@@ -201,7 +201,7 @@ export function OverviewClient() {
             placeholder="MM/DD/YYYY"
             className="bg-muted border border-border rounded px-3 py-1.5 text-sm font-mono text-foreground w-28 focus:outline-none focus:border-primary/50"
           />
-          <label className="text-[13px] text-[#7a8494] font-mono">to:</label>
+          <label className="text-[13px] text-muted-foreground font-mono">to:</label>
           <input
             type="text"
             value={dateTo}
@@ -255,11 +255,11 @@ export function OverviewClient() {
                 className="inline-block w-1.5 h-1.5 rounded-full self-center shrink-0"
                 style={{ backgroundColor: color }}
               />
-              <span className="text-[12px] text-[#7a8494] font-mono">{label}:</span>
+              <span className="text-[12px] text-muted-foreground font-mono">{label}:</span>
               <span className="text-[13px] font-bold tabular-nums font-mono" style={{ color }}>
                 {formatTokens(value)}
               </span>
-              <span className="text-[12px] text-[#5a6474] font-mono">
+              <span className="text-[12px] text-muted-foreground/60 font-mono">
                 {Math.round((value / total) * 100)}%
               </span>
             </span>

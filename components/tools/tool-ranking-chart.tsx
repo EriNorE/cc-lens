@@ -18,10 +18,10 @@ export function ToolRankingChart({ tools }: Props) {
       </h3>
       <ResponsiveContainer width="100%" height={Math.max(200, top.length * 26)}>
         <BarChart data={top} layout="vertical" margin={{ top: 0, right: 60, bottom: 0, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e2230" horizontal={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
           <XAxis
             type="number"
-            tick={{ fontSize: 11, fill: '#7a8494' }}
+            tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
             tickLine={false}
             axisLine={false}
             tickFormatter={v => v.toLocaleString()}
@@ -29,13 +29,13 @@ export function ToolRankingChart({ tools }: Props) {
           <YAxis
             type="category"
             dataKey="name"
-            tick={{ fontSize: 12, fill: '#94a3b8' }}
+            tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
             tickLine={false}
             axisLine={false}
             width={110}
           />
           <Tooltip
-            contentStyle={{ background: '#141620', border: '1px solid #1e2230', borderRadius: 4, fontSize: 12 }}
+            contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}
             formatter={(val: number | undefined, _name?: string, props?: { payload?: { name?: string } }) => [
               (val ?? 0).toLocaleString() + ' calls',
               props?.payload?.name ?? '',

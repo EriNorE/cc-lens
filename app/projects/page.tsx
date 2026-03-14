@@ -49,7 +49,7 @@ export default function ProjectsPage() {
             placeholder="Search projects..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-[#141620] border border-border rounded px-2 py-1 text-[13px] text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-[#d97706]/50 w-48"
+            className="bg-muted border border-border rounded px-2 py-1 text-[13px] text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary/50 w-48"
           />
           <div className="flex gap-1 ml-auto">
             {([
@@ -61,7 +61,7 @@ export default function ProjectsPage() {
               <button
                 key={k}
                 onClick={() => setSort(k)}
-                className={`px-2 py-1 rounded text-[12px] transition-colors ${sort === k ? 'bg-[#d97706] text-black font-bold' : 'text-muted-foreground hover:text-foreground border border-border'}`}
+                className={`px-2 py-1 rounded text-[12px] transition-colors ${sort === k ? 'bg-primary text-black font-bold' : 'text-muted-foreground hover:text-foreground border border-border'}`}
               >
                 {label}
               </button>
@@ -72,7 +72,7 @@ export default function ProjectsPage() {
         {isLoading && (
           <div className="grid grid-cols-2 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-48 bg-[#141620] rounded animate-pulse" />
+              <div key={i} className="h-48 bg-muted rounded animate-pulse" />
             ))}
           </div>
         )}

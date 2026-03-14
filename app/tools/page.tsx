@@ -32,7 +32,7 @@ export default function ToolsPage() {
         {isLoading && (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-32 bg-[#141620] rounded animate-pulse" />
+              <div key={i} className="h-32 bg-muted rounded animate-pulse" />
             ))}
           </div>
         )}
@@ -116,7 +116,7 @@ export default function ToolsPage() {
                     return (
                       <div key={cat} className="flex items-center gap-2">
                         <span className="text-muted-foreground/70 w-32">{cat}</span>
-                        <div className="flex-1 h-2 bg-[#141620] rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                           <div className="h-full rounded-full bg-[#f87171]/50" style={{ width: `${width}%` }} />
                         </div>
                         <span className="text-[#f87171] w-8 text-right text-[12px]">{count}</span>
@@ -144,7 +144,7 @@ export default function ToolsPage() {
                     return (
                       <div key={branch} className="flex items-center gap-2">
                         <span className="text-muted-foreground/70 w-28 truncate font-mono text-[12px]">{branch}</span>
-                        <div className="flex-1 h-2 bg-[#141620] rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                           <div className="h-full rounded-full bg-[#34d399]/50" style={{ width: `${width}%` }} />
                         </div>
                         <span className="text-muted-foreground/50 text-[12px] w-20 text-right">{turns.toLocaleString()} turns</span>

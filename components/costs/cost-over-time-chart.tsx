@@ -61,7 +61,7 @@ export function CostOverTimeChart({ daily }: Props) {
             <button
               key={w}
               onClick={() => setWindow(w)}
-              className={`px-2 py-0.5 rounded text-[12px] transition-colors ${window === w ? 'bg-[#d97706] text-black font-bold' : 'text-muted-foreground hover:text-foreground border border-border'}`}
+              className={`px-2 py-0.5 rounded text-[12px] transition-colors ${window === w ? 'bg-primary text-black font-bold' : 'text-muted-foreground hover:text-foreground border border-border'}`}
             >
               {w === 365 ? 'All' : `${w}d`}
             </button>
@@ -70,11 +70,11 @@ export function CostOverTimeChart({ daily }: Props) {
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e2230" />
-          <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#7a8494' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-          <YAxis tick={{ fontSize: 11, fill: '#7a8494' }} tickLine={false} axisLine={false} tickFormatter={v => `$${v.toFixed(2)}`} width={48} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} tickLine={false} axisLine={false} tickFormatter={v => `$${v.toFixed(2)}`} width={48} />
           <Tooltip
-            contentStyle={{ background: '#141620', border: '1px solid #1e2230', borderRadius: 4, fontSize: 12 }}
+            contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}
             formatter={(val: number | undefined, name?: string) => [formatCost(val ?? 0), shortModel(name ?? '')]}
           />
           {models.map(m => (

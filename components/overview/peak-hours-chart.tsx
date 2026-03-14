@@ -3,12 +3,14 @@
 import {
   BarChart,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import { useTheme } from '@/components/theme-provider'
 
 interface Props {
   hourCounts: Record<string, number>
@@ -21,27 +23,39 @@ function CustomTooltip({ active, payload, label }: any) {
   const period = hour < 12 ? 'AM' : 'PM'
   const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
   return (
-    <div className="bg-[#1a1d26] border border-[#262a36] rounded-lg px-3 py-2 text-[13px]">
-      <p className="text-[#94a3b8]">{h12}:00 {period}</p>
-      <p className="text-[#fbbf24] font-bold">{payload[0].value} sessions</p>
+    <div className="bg-card border border-border rounded-lg px-3 py-2 text-[13px]">
+      <p className="text-muted-foreground">{h12}:00 {period}</p>
+      <p className="text-primary font-bold">{payload[0].value} sessions</p>
     </div>
   )
 }
 
 export function PeakHoursChart({ hourCounts }: Props) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   const data = Array.from({ length: 24 }, (_, i) => ({
     hour: String(i),
     count: hourCounts[String(i)] ?? 0,
   }))
 
+  const sorted = [...data].sort((a, b) => b.count - a.count)
+  const top3Hours = new Set(sorted.slice(0, 3).map(d => d.hour))
+
+  // Light mode: bright amber for top, soft amber for rest
+  // Dark mode: keep the original darker tones
+  const topFill    = isDark ? '#d97706' : '#f59e0b'
+  const normalFill = isDark ? '#78350f' : '#fde68a'
+  const strokeColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.4)'
+
   return (
     <div>
       <ResponsiveContainer width="100%" height={160}>
         <BarChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e2230" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="hour"
-            tick={{ fontSize: 11, fill: '#7a8494' }}
+            tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
             tickLine={false}
             axisLine={false}
             tickFormatter={v => {
@@ -54,9 +68,20 @@ export function PeakHoursChart({ hourCounts }: Props) {
           />
           <YAxis hide />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(180,83,9,0.08)' }} />
-          <Bar dataKey="count" radius={[2, 2, 0, 0]} maxBarSize={14} fill="#b45309" />
+          <Bar dataKey="count" radius={[2, 2, 0, 0]} maxBarSize={14}
+               stroke={strokeColor} strokeWidth={0.75}>
+            {data.map(d => (
+              <Cell
+                key={d.hour}
+                fill={top3Hours.has(d.hour) ? topFill : normalFill}
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
+      <p className="text-[11px] font-mono text-muted-foreground/60 mt-1">
+        top 3 peak hours highlighted
+      </p>
     </div>
   )
 }

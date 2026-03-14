@@ -74,7 +74,7 @@ export function SessionTable({ sessions }: Props) {
     return (
       <button
         onClick={() => toggleSort(k)}
-        className={`text-left text-[12px] font-bold uppercase tracking-wider whitespace-nowrap hover:text-foreground transition-colors ${active ? 'text-[#d97706]' : 'text-muted-foreground'}`}
+        className={`text-left text-[12px] font-bold uppercase tracking-wider whitespace-nowrap hover:text-foreground transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
       >
         {label} {active ? (sortDir === 'desc' ? '↓' : '↑') : ''}
       </button>
@@ -129,7 +129,7 @@ export function SessionTable({ sessions }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-border bg-[#141620]">
+              <tr className="border-b border-border bg-muted">
                 <th className="px-3 py-2 text-left"><SortHeader label="Date" k="start_time" /></th>
                 <th className="px-3 py-2 text-left"><span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Project</span></th>
                 <th className="px-3 py-2 text-right"><SortHeader label="Dur" k="duration_minutes" /></th>
@@ -149,7 +149,7 @@ export function SessionTable({ sessions }: Props) {
                 return (
                   <tr
                     key={s.session_id}
-                    className={`border-b border-border/50 hover:bg-[#1a1d26] transition-colors ${i % 2 === 0 ? '' : 'bg-[#12141b]'}`}
+                    className={`border-b border-border/50 hover:bg-muted transition-colors ${i % 2 === 0 ? '' : 'bg-muted/30'}`}
                   >
                     <td className="px-3 py-2 font-mono text-muted-foreground whitespace-nowrap">
                       {formatDate(s.start_time)}
@@ -157,7 +157,7 @@ export function SessionTable({ sessions }: Props) {
                     <td className="px-3 py-2 max-w-[200px]">
                       <Link
                         href={`/sessions/${s.session_id}`}
-                        className="text-foreground hover:text-[#d97706] transition-colors font-medium truncate block"
+                        className="text-foreground hover:text-primary transition-colors font-medium truncate block"
                         title={s.project_path ?? ''}
                       >
                         {projectName}
@@ -177,7 +177,7 @@ export function SessionTable({ sessions }: Props) {
                     <td className="px-3 py-2 text-right text-muted-foreground">
                       {totalTools.toLocaleString()}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono text-[#d97706]">
+                    <td className="px-3 py-2 text-right font-mono text-primary">
                       {formatCost(s.estimated_cost)}
                     </td>
                     <td className="px-3 py-2">
@@ -215,7 +215,7 @@ export function SessionTable({ sessions }: Props) {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-[#d97706]/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               ←
             </button>
@@ -228,7 +228,7 @@ export function SessionTable({ sessions }: Props) {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`px-2 py-1 rounded border transition-colors ${p === page ? 'border-[#d97706] text-[#fbbf24]' : 'border-border text-muted-foreground hover:text-foreground hover:border-[#d97706]/40'}`}
+                  className={`px-2 py-1 rounded border transition-colors ${p === page ? 'border-primary text-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'}`}
                 >
                   {p}
                 </button>
@@ -237,7 +237,7 @@ export function SessionTable({ sessions }: Props) {
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-[#d97706]/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               →
             </button>

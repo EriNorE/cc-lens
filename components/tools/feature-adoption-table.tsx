@@ -35,7 +35,7 @@ export function FeatureAdoptionTable({ adoption, totalSessions }: Props) {
             const pct = (r.pct * 100).toFixed(1)
             const width = Math.round(r.pct * 100)
             return (
-              <tr key={r.key} className="border-b border-border/30 hover:bg-[#141620]/30 transition-colors">
+              <tr key={r.key} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
                 <td className="py-2">
                   <span className="mr-1.5">{r.icon}</span>
                   <span className="text-foreground/80">{r.label}</span>
@@ -43,7 +43,7 @@ export function FeatureAdoptionTable({ adoption, totalSessions }: Props) {
                 <td className="py-2 text-right text-foreground font-bold">{r.sessions}</td>
                 <td className="py-2 text-right text-[#d97706]">{pct}%</td>
                 <td className="py-2 pl-4">
-                  <div className="h-2 bg-[#141620] rounded-full overflow-hidden w-24">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden w-24">
                     <div className="h-full rounded-full bg-[#d97706]/60" style={{ width: `${width}%` }} />
                   </div>
                 </td>

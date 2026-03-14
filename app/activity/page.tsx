@@ -46,7 +46,7 @@ export default function ActivityPage() {
         {isLoading && (
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-40 bg-[#141620] rounded animate-pulse" />
+              <div key={i} className="h-40 bg-muted rounded animate-pulse" />
             ))}
           </div>
         )}

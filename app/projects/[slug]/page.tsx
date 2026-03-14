@@ -44,7 +44,7 @@ export default function ProjectDetailPage() {
         <TopBar title="project detail" subtitle="loading..." />
         <div className="p-6 space-y-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-32 bg-[#141620] rounded animate-pulse" />
+            <div key={i} className="h-32 bg-muted rounded animate-pulse" />
           ))}
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function ProjectDetailPage() {
             <div className="border border-border rounded overflow-hidden">
               <table className="w-full text-[13px]">
                 <thead>
-                  <tr className="border-b border-border bg-[#141620]">
+                  <tr className="border-b border-border bg-muted">
                     {['Date', 'Slug', 'Msgs', 'Cost'].map(h => (
                       <th key={h} className={`px-3 py-2 text-[12px] font-bold text-muted-foreground uppercase tracking-wider ${h === 'Date' || h === 'Slug' ? 'text-left' : 'text-right'}`}>{h}</th>
                     ))}
@@ -117,10 +117,10 @@ export default function ProjectDetailPage() {
                   {sessions.map((s, i) => {
                     const msgs = (s.user_message_count ?? 0) + (s.assistant_message_count ?? 0)
                     return (
-                      <tr key={s.session_id} className={`border-b border-border/30 hover:bg-[#141620]/50 transition-colors ${i % 2 ? 'bg-[#12141b]/20' : ''}`}>
+                      <tr key={s.session_id} className={`border-b border-border/30 hover:bg-muted/50 transition-colors ${i % 2 ? 'bg-muted/20' : ''}`}>
                         <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{formatDate(s.start_time)}</td>
                         <td className="px-3 py-2">
-                          <Link href={`/sessions/${s.session_id}`} className="text-foreground hover:text-[#d97706] transition-colors">
+                          <Link href={`/sessions/${s.session_id}`} className="text-foreground hover:text-primary transition-colors">
                             {s.slug ?? s.session_id.slice(0, 8)}
                           </Link>
                         </td>
@@ -145,7 +145,7 @@ export default function ProjectDetailPage() {
                 return (
                   <div key={tool} className="flex items-center gap-2">
                     <span className="text-muted-foreground/70 w-24 truncate text-[12px]">{tool}</span>
-                    <div className="flex-1 h-2 bg-[#141620] rounded-full overflow-hidden">
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                       <div className="h-full rounded-full" style={{ width: `${width}%`, backgroundColor: color + '90' }} />
                     </div>
                     <span className="text-muted-foreground/50 text-[12px] w-8 text-right">{count}</span>
@@ -168,24 +168,24 @@ export default function ProjectDetailPage() {
                 }))}
                 margin={{ top: 8, right: 16, bottom: 24, left: 8 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e2230" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11, fill: '#7a8494' }}
+                  tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"
                   height={36}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#7a8494' }}
+                  tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={v => `$${v.toFixed(2)}`}
                   width={52}
                 />
                 <Tooltip
-                  contentStyle={{ background: '#141620', border: '1px solid #1e2230', borderRadius: 4, fontSize: 12 }}
+                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}
                   formatter={(v: number | undefined) => [formatCost(v ?? 0), 'Cost']}
                 />
                 <Line type="monotone" dataKey="cost" stroke="#d97706" strokeWidth={2} dot={{ r: 3, fill: '#d97706' }} />
@@ -230,7 +230,7 @@ export default function ProjectDetailPage() {
                   return (
                     <div key={branch} className="flex items-center gap-2">
                       <span className="text-muted-foreground/70 w-24 truncate text-[12px] font-mono">{branch}</span>
-                      <div className="flex-1 h-2 bg-[#141620] rounded-full overflow-hidden">
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                         <div className="h-full rounded-full bg-[#34d399]/50" style={{ width: `${width}%` }} />
                       </div>
                       <span className="text-muted-foreground/50 text-[12px] w-12 text-right">{turns} turns</span>

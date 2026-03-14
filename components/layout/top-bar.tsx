@@ -45,28 +45,28 @@ export function TopBar({ title, subtitle, showStarButton = false }: TopBarProps)
   const displayTime = now || '—'
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#1e2230] bg-[#0f1117]/95 backdrop-blur px-8 py-5 flex items-start justify-between">
+    <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur px-4 md:px-8 py-4 md:py-5 flex items-start justify-between">
       <div className="space-y-1">
         <div className="flex items-center gap-2.5">
-          <span className="text-[#d97706] text-lg leading-none">●</span>
-          <h1 className="text-lg font-bold text-[#e8eaed] tracking-tight font-mono">{title}</h1>
+          <span className="text-primary text-lg leading-none">●</span>
+          <h1 className="text-lg font-bold text-foreground tracking-tight font-mono">{title}</h1>
         </div>
         {subtitle && (
-          <p className="text-base text-[#94a3b8] font-mono pl-6">{subtitle}</p>
+          <p className="text-base text-muted-foreground font-mono pl-6">{subtitle}</p>
         )}
-        <p className="text-sm text-[#5a6474] font-mono pl-6">
+        <p className="text-sm text-muted-foreground/60 font-mono pl-6">
           last update: {displayTime}
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         <button
           onClick={handleRefresh}
           className={[
-            'flex items-center gap-2 px-5 py-2 text-base font-mono border rounded',
+            'flex items-center gap-2 px-3 md:px-5 py-2 text-sm md:text-base font-mono border rounded',
             refreshing
-              ? 'text-[#d97706] border-[#d97706]/50'
-              : 'text-[#94a3b8] border-[#262a36] hover:text-[#e8eaed] hover:border-[#d97706]/40',
+              ? 'text-primary border-primary/50'
+              : 'text-muted-foreground border-border hover:text-foreground hover:border-primary/40',
             'transition-colors cursor-pointer',
           ].join(' ')}
         >

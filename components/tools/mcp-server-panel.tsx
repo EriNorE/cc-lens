@@ -29,7 +29,7 @@ export function McpServerPanel({ servers }: Props) {
                 return (
                   <div key={t.name} className="flex items-center gap-2 text-[12px]">
                     <span className="text-muted-foreground/70 w-32 truncate font-mono">{t.name}</span>
-                    <div className="flex-1 h-1.5 bg-[#141620] rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                       <div className="h-full rounded-full bg-[#34d399]/50" style={{ width: `${width}%` }} />
                     </div>
                     <span className="text-muted-foreground/50 w-12 text-right">{t.calls}</span>

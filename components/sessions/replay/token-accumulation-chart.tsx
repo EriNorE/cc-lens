@@ -52,23 +52,23 @@ export function TokenAccumulationChart({ turns, compactions }: Props) {
       </h3>
       <ResponsiveContainer width="100%" height={180}>
         <LineChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e2230" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="turn"
-            tick={{ fontSize: 9, fill: '#7a8494' }}
+            tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
             tickLine={false}
             axisLine={false}
-            label={{ value: 'Turn', position: 'insideBottom', offset: -2, fontSize: 9, fill: '#7a8494' }}
+            label={{ value: 'Turn', position: 'insideBottom', offset: -2, fontSize: 9, fill: 'var(--muted-foreground)' }}
           />
           <YAxis
-            tick={{ fontSize: 9, fill: '#7a8494' }}
+            tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }}
             tickLine={false}
             axisLine={false}
             tickFormatter={formatTokens}
             width={48}
           />
           <Tooltip
-            contentStyle={{ background: '#141620', border: '1px solid #1e2230', borderRadius: 4, fontSize: 12 }}
+            contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}
             formatter={(val: number | undefined, name?: string) => [
               name === 'tokens' ? formatTokens(val ?? 0) : formatCost(val ?? 0),
               name === 'tokens' ? 'Context tokens' : 'Cumulative cost',

@@ -63,8 +63,8 @@ export function OverviewConversationTable({ sessions }: Props) {
       className={[
         'px-3 py-1.5 text-[13px] font-mono rounded border transition-colors',
         filter === value
-          ? 'bg-[#d97706] text-[#0f1117] border-[#d97706] font-bold'
-          : 'bg-transparent text-[#7a8494] border-[#262a36] hover:text-[#e8eaed] hover:border-[#363b4a]',
+          ? 'bg-primary text-primary-foreground border-primary font-bold'
+          : 'bg-transparent text-muted-foreground border-border hover:text-foreground hover:border-muted-foreground',
       ].join(' ')}
     >
       {label}
@@ -80,33 +80,33 @@ export function OverviewConversationTable({ sessions }: Props) {
         <FilterButton value="all" label="all" />
       </div>
 
-      <div className="border border-[#262a36] rounded-lg overflow-hidden">
+      <div className="border border-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-[#262a36] bg-[#141620]">
-                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+              <tr className="border-b border-border bg-muted">
+                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   conversation id
                 </th>
-                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   project
                 </th>
-                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   model
                 </th>
-                <th className="px-3 py-2.5 text-right text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+                <th className="px-3 py-2.5 text-right text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   messages
                 </th>
-                <th className="px-3 py-2.5 text-right text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+                <th className="px-3 py-2.5 text-right text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   tokens
                 </th>
-                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   last activity
                 </th>
-                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   conversation state
                 </th>
-                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-[#7a8494]">
+                <th className="px-3 py-2.5 text-left text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
                   status
                 </th>
               </tr>
@@ -122,19 +122,19 @@ export function OverviewConversationTable({ sessions }: Props) {
                 return (
                   <tr
                     key={s.session_id}
-                    className={`border-b border-[#1e2230]/60 hover:bg-[#1a1d26] transition-colors ${
-                      i % 2 === 0 ? '' : 'bg-[#12141b]'
+                    className={`border-b border-border/60 hover:bg-muted/50 transition-colors ${
+                      i % 2 === 0 ? '' : 'bg-muted/30'
                     }`}
                   >
-                    <td className="px-3 py-2 font-mono text-[#94a3b8] whitespace-nowrap">
+                    <td className="px-3 py-2 font-mono text-muted-foreground whitespace-nowrap">
                       <span className="inline-flex items-center gap-1.5">
                         <span
-                          className="inline-block w-2 h-2 rounded-sm shrink-0 bg-[#d97706]/50"
+                          className="inline-block w-2 h-2 rounded-sm shrink-0 bg-primary/50"
                           title={s.session_id}
                         />
                         <Link
                           href={`/sessions/${s.session_id}`}
-                          className="hover:text-[#34d399] transition-colors"
+                          className="hover:text-primary transition-colors"
                         >
                           {shortId(s.session_id)}
                         </Link>
@@ -143,28 +143,28 @@ export function OverviewConversationTable({ sessions }: Props) {
                     <td className="px-3 py-2">
                       <Link
                         href={`/sessions/${s.session_id}`}
-                        className="text-[#e8eaed] hover:text-[#fbbf24] transition-colors font-medium"
+                        className="text-foreground hover:text-primary transition-colors font-medium"
                       >
                         {projectName}
                       </Link>
                     </td>
-                    <td className="px-3 py-2 text-[#94a3b8] font-mono">{shortModel()}</td>
-                    <td className="px-3 py-2 text-right text-[#94a3b8]">
+                    <td className="px-3 py-2 text-muted-foreground font-mono">{shortModel()}</td>
+                    <td className="px-3 py-2 text-right text-muted-foreground">
                       {totalMsgs.toLocaleString()}
                     </td>
-                    <td className="px-3 py-2 text-right font-mono text-[#d97706]">
+                    <td className="px-3 py-2 text-right font-mono text-primary">
                       {formatTokens(totalTokens)}
                     </td>
-                    <td className="px-3 py-2 text-[#94a3b8]">
+                    <td className="px-3 py-2 text-muted-foreground">
                       {formatRelativeDate(s.start_time) === 'just now' ? 'now' : formatRelativeDate(s.start_time)}
                     </td>
-                    <td className="px-3 py-2 text-[#94a3b8]">Completed</td>
+                    <td className="px-3 py-2 text-muted-foreground">Completed</td>
                     <td className="px-3 py-2">
                       <span
                         className={
                           status === 'active'
                             ? 'text-[#34d399] font-medium'
-                            : 'text-[#5a6474]'
+                            : 'text-muted-foreground/50'
                         }
                       >
                         {status}
@@ -177,7 +177,7 @@ export function OverviewConversationTable({ sessions }: Props) {
                 <tr>
                   <td
                     colSpan={8}
-                    className="px-3 py-8 text-center text-[#5a6474] text-[13px]"
+                    className="px-3 py-8 text-center text-muted-foreground/60 text-[13px]"
                   >
                     No conversations match filter
                   </td>

@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Moon, Sun } from 'lucide-react'
+import { useTheme } from '@/components/theme-provider'
 
 const NAV = [
   { href: '/',          label: 'overview'  },
@@ -10,17 +12,22 @@ const NAV = [
   { href: '/costs',     label: 'costs'     },
   { href: '/tools',     label: 'tools'     },
   { href: '/activity',  label: 'activity'  },
+  { href: '/history',   label: 'history'   },
+  { href: '/todos',     label: 'todos'     },
+  { href: '/plans',     label: 'plans'     },
+  { href: '/settings',  label: 'settings'  },
   { href: '/export',    label: 'export'    },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { theme, toggle } = useTheme()
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-56 flex flex-col border-r border-[#1a1d26] bg-[#0b0d12] z-40">
-      <div className="px-4 pt-5 pb-4 border-b border-[#1a1d26]">
+    <aside className="hidden md:flex fixed left-0 top-0 h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar z-40">
+      <div className="px-4 pt-5 pb-4 border-b border-sidebar-border">
         <span
-          className="text-[#c2703a] text-[14px] leading-none whitespace-nowrap"
+          className="text-[#c2703a] text-[12px] leading-none whitespace-nowrap"
           style={{
             fontFamily: 'var(--font-press-start)',
             WebkitTextStroke: '0.5px #c2703a',
@@ -29,7 +36,6 @@ export function Sidebar() {
         >
           Claude Code Lens
         </span>
-        {/* <p className="text-[11px] text-[#7a8494] font-mono mt-2">~/.claude</p> */}
       </div>
 
       <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
@@ -42,19 +48,26 @@ export function Sidebar() {
               className={[
                 'flex items-center gap-2.5 px-4 py-3 rounded-r text-base font-mono transition-colors relative',
                 active
-                  ? 'text-[#fbbf24] bg-[#1a1d26] border-l-2 border-l-[#d97706] pl-[14px]'
-                  : 'text-[#94a3b8] hover:text-[#e8eaed] hover:bg-[#141620]/80',
+                  ? 'text-sidebar-primary bg-sidebar-accent border-l-2 border-l-sidebar-primary pl-[14px]'
+                  : 'text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/80',
               ].join(' ')}
             >
-              <span className={active ? 'text-[#d97706]' : 'text-[#4a5468]'}>›</span>
+              <span className={active ? 'text-sidebar-primary' : 'text-sidebar-foreground/40'}>›</span>
               {label}
             </Link>
           )
         })}
       </nav>
 
-      <div className="px-5 py-4 border-t border-[#1a1d26]">
-        <p className="text-sm text-[#4a5468] font-mono">Made by Arindam</p>
+      <div className="px-5 py-4 border-t border-sidebar-border flex items-center justify-between">
+        <p className="text-sm text-sidebar-foreground/50 font-mono">Made by Arindam</p>
+        <button
+          onClick={toggle}
+          aria-label="Toggle theme"
+          className="p-1.5 rounded text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
       </div>
     </aside>
   )
