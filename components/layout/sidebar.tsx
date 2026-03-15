@@ -15,6 +15,7 @@ const NAV = [
   { href: '/history',   label: 'history'   },
   { href: '/todos',     label: 'todos'     },
   { href: '/plans',     label: 'plans'     },
+  { href: '/memory',    label: 'memory'    },
   { href: '/settings',  label: 'settings'  },
   { href: '/export',    label: 'export'    },
 ]
