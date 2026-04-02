@@ -1,6 +1,6 @@
 {
   "name": "cc-lens",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Claude Code Lens — visualize your usage, costs, and sessions from ~/.claude/",
   "author": "Arindam Majumder <arindam@studio1hq.com> (https://github.com/Arindam200)",
   "license": "MIT",
@@ -63,8 +63,11 @@
     "@types/react-dom": "^19"
   },
   "devDependencies": {
-    "eslint": "^9",
+    "eslint": "9.39.3",
     "eslint-config-next": "16.2.2",
     "shadcn": "^3.8.5"
+  },
+  "overrides": {
+    "@eslint/eslintrc": "3.3.4"
   }
 }

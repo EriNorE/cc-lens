@@ -18,8 +18,8 @@ export async function GET(
   const estimated_cost = estimateCostFromUsage('claude-opus-4-6', {
     input_tokens: meta.input_tokens ?? 0,
     output_tokens: meta.output_tokens ?? 0,
-    cache_creation_input_tokens: 0,
-    cache_read_input_tokens: 0,
+    cache_creation_input_tokens: meta.cache_creation_input_tokens ?? 0,
+    cache_read_input_tokens: meta.cache_read_input_tokens ?? 0,
   })
 
   return NextResponse.json({ session: { ...meta, facet, estimated_cost } })

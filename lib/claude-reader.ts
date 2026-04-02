@@ -132,7 +132,7 @@ async function deriveSessionMetaFromJSONL(
               const item = c as { type?: string; name?: string }
               if (item.type === 'tool_use' && item.name) {
                 toolCounts[item.name] = (toolCounts[item.name] ?? 0) + 1
-                if (item.name.startsWith('Task') || item.name === 'TodoWrite') hasTaskAgent = true
+                if (item.name.startsWith('Task') || item.name === 'TodoWrite' || item.name === 'Agent') hasTaskAgent = true
                 if (item.name.startsWith('mcp__')) hasMcp = true
                 if (item.name === 'WebSearch') hasWebSearch = true
                 if (item.name === 'WebFetch') hasWebFetch = true
@@ -165,6 +165,8 @@ async function deriveSessionMetaFromJSONL(
     git_pushes: 0,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    cache_creation_input_tokens: cacheWrite,
+    cache_read_input_tokens: cacheRead,
     first_prompt: firstPrompt,
     user_interruptions: 0,
     user_response_times: [],

@@ -57,6 +57,8 @@ export interface SessionMeta {
   git_pushes: number
   input_tokens: number
   output_tokens: number
+  cache_creation_input_tokens?: number
+  cache_read_input_tokens?: number
   first_prompt: string
   user_interruptions: number
   user_response_times: number[]
