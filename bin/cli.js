@@ -1,21 +1,20 @@
 #!/usr/bin/env node
 
 const { spawn, exec } = require('child_process')
-const net = require('net')
-const os  = require('os')
+const net  = require('net')
+const os   = require('os')
 const path = require('path')
-const fs = require('fs')
+const fs   = require('fs')
 
 const PKG_DIR   = path.join(__dirname, '..')
-const HOME_DIR  = process.env.HOME || process.env.USERPROFILE || os.homedir()
-const CACHE_DIR = path.join(HOME_DIR, '.cc-lens')
+const CACHE_DIR = path.join(os.homedir(), '.cc-lens')
 
 // ANSI helpers — Claude's warm orange palette
-const O  = '\x1b[38;5;208m'  // orange
-const O2 = '\x1b[38;5;214m'  // amber
+const O   = '\x1b[38;5;208m'  // orange
+const O2  = '\x1b[38;5;214m'  // amber
 const DIM = '\x1b[2m'
-const B  = '\x1b[1m'
-const R  = '\x1b[0m'
+const B   = '\x1b[1m'
+const R   = '\x1b[0m'
 
 // OSC 8 terminal hyperlink
 function link(text, url) {
@@ -59,70 +58,76 @@ function openBrowser(url) {
   exec(cmd)
 }
 
+// Source dirs/files to mirror into ~/.cc-lens/
+const SRC_DIRS  = ['app', 'components', 'lib', 'types', 'public']
+const SRC_FILES = ['next.config.ts', 'tsconfig.json', 'postcss.config.mjs', 'components.json']
+
+function syncSource(pkg) {
+  fs.mkdirSync(CACHE_DIR, { recursive: true })
+  for (const dir of SRC_DIRS) {
+    const src = path.join(PKG_DIR, dir)
+    if (fs.existsSync(src)) {
+      fs.cpSync(src, path.join(CACHE_DIR, dir), { recursive: true, force: true })
+    }
+  }
+  for (const file of SRC_FILES) {
+    const src = path.join(PKG_DIR, file)
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(CACHE_DIR, file))
+    }
+  }
+  // Write a minimal package.json with only runtime dependencies —
+  // devDependencies (eslint, shadcn, etc.) are not needed and may have
+  // pinned versions that don't exist on npm, causing ETARGET errors.
+  fs.writeFileSync(path.join(CACHE_DIR, 'package.json'), JSON.stringify({
+    name: 'cc-lens-runtime',
+    version: pkg.version,
+    dependencies: pkg.dependencies,
+  }, null, 2))
+}
+
 async function main() {
   printBanner()
 
-  // Install deps into ~/.cc-lens/ (persistent, outside the npx temp dir).
-  // Running `npm install` inside the npx cache dir fails because npm holds a
-  // lock on it while executing the package. Writing to a user-owned directory
-  // sidesteps that entirely and makes subsequent runs instant.
-  const src = require(path.join(PKG_DIR, 'package.json'))
+  const pkg = require(path.join(PKG_DIR, 'package.json'))
 
-  if (!fs.existsSync(CACHE_DIR)) {
-    fs.mkdirSync(CACHE_DIR, { recursive: true })
-  }
+  // Check whether ~/.cc-lens/ is up-to-date for this version
+  const versionFile = path.join(CACHE_DIR, '.cc-lens-version')
+  const cachedVersion = fs.existsSync(versionFile)
+    ? fs.readFileSync(versionFile, 'utf8').trim()
+    : null
 
-  // Refresh the package.json in ~/.cc-lens/ when the version changes
-  const cachePkg = path.join(CACHE_DIR, 'package.json')
-  const needsInstall = (() => {
-    const nextBin = path.join(CACHE_DIR, 'node_modules', '.bin', process.platform === 'win32' ? 'next.cmd' : 'next')
-    if (!fs.existsSync(nextBin)) return true
-    try {
-      const cached = JSON.parse(fs.readFileSync(cachePkg, 'utf8'))
-      return cached.version !== src.version
-    } catch { return true }
-  })()
+  const nextBin = path.join(CACHE_DIR, 'node_modules', '.bin', process.platform === 'win32' ? 'next.cmd' : 'next')
+  const needsSetup = cachedVersion !== pkg.version || !fs.existsSync(nextBin)
 
-  if (needsInstall) {
-    fs.writeFileSync(cachePkg, JSON.stringify({
-      name: 'cc-lens-runtime',
-      version: src.version,
-      dependencies: src.dependencies,
-    }, null, 2))
+  if (needsSetup) {
+    console.log(`  ${DIM}Setting up (first run, may take a minute)…${R}\n`)
 
-    console.log(`  ${DIM}Installing dependencies (first run, may take a minute)…${R}\n`)
+    // Copy all source files into ~/.cc-lens/ so Next.js runs entirely within
+    // that directory — no symlinks, no Turbopack root violations.
+    syncSource(pkg)
+
     await new Promise((resolve, reject) => {
       const install = spawn('npm', ['install', '--prefer-offline', '--no-package-lock'], {
         cwd: CACHE_DIR,
         stdio: 'inherit',
         shell: true,
       })
-      install.on('exit', (code) => code === 0 ? resolve() : reject(new Error(`npm install failed (exit ${code})`)))
+      install.on('exit', (code) =>
+        code === 0 ? resolve() : reject(new Error(`npm install failed (exit ${code})`))
+      )
     })
+
+    fs.writeFileSync(versionFile, pkg.version)
   }
 
-  // Symlink PKG_DIR/node_modules → ~/.cc-lens/node_modules so that Next.js
-  // (running from PKG_DIR) resolves imports through the cached install.
-  const pkgModules   = path.join(PKG_DIR, 'node_modules')
-  const cacheModules = path.join(CACHE_DIR, 'node_modules')
-  // Use lstatSync (not existsSync) so we can detect and replace broken symlinks
-  const lstat = fs.lstatSync(pkgModules, { throwIfNoEntry: false })
-  if (!lstat) {
-    fs.symlinkSync(cacheModules, pkgModules, 'dir')
-  } else if (lstat.isSymbolicLink() && !fs.existsSync(pkgModules)) {
-    // broken symlink — remove and recreate
-    fs.unlinkSync(pkgModules)
-    fs.symlinkSync(cacheModules, pkgModules, 'dir')
-  }
-
-  const nextBin = path.join(CACHE_DIR, 'node_modules', '.bin', process.platform === 'win32' ? 'next.cmd' : 'next')
   const port = await findFreePort(3000)
   const url  = `http://localhost:${port}`
 
   console.log(`  ${DIM}Starting server on${R} ${O2}${B}${url}${R}\n`)
 
   const child = spawn(nextBin, ['dev', '--port', String(port)], {
-    cwd: PKG_DIR,
+    cwd: CACHE_DIR,
     stdio: ['inherit', 'pipe', 'pipe'],
     env: { ...process.env, PORT: String(port) },
   })
