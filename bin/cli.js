@@ -64,7 +64,7 @@ async function main() {
   if (!fs.existsSync(nextBin)) {
     console.log(`  ${DIM}Installing dependencies…${R}\n`)
     await new Promise((resolve, reject) => {
-      const install = spawn('npm', ['install', '--prefer-offline'], {
+      const install = spawn('npm', ['install', '--prefer-offline', '--omit=dev'], {
         cwd: PKG_DIR,
         stdio: 'inherit',
         shell: true,

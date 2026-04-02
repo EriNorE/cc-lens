@@ -1,6 +1,6 @@
 {
   "name": "cc-lens",
-  "version": "0.1.6",
+  "version": "0.1.10",
   "description": "Claude Code Lens — visualize your usage, costs, and sessions from ~/.claude/",
   "author": "Arindam Majumder <arindam@studio1hq.com> (https://github.com/Arindam200)",
   "license": "MIT",
@@ -32,7 +32,6 @@
     "public",
     "next.config.*",
     "tsconfig.json",
-    "tailwind.config.*",
     "postcss.config.*",
     "components.json"
   ],
@@ -49,7 +48,7 @@
     "date-fns": "^4.1.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.575.0",
-    "next": "16.1.6",
+    "next": "16.2.2",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -58,14 +57,14 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^5"
-  },
-  "devDependencies": {
+    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react-dom": "^19"
+  },
+  "devDependencies": {
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.2",
     "shadcn": "^3.8.5"
   }
 }
