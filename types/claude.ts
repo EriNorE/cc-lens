@@ -33,6 +33,7 @@ export interface StatsCache {
   lastComputedDate: string
   dailyActivity: DailyActivity[]
   tokensByDate: DailyTokens[]
+  dailyModelTokens?: DailyTokens[]
   modelUsage: Record<string, ModelUsage>
   totalSessions: number
   totalMessages: number

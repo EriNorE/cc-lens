@@ -34,7 +34,8 @@ export async function GET() {
   }).sort((a, b) => b.estimated_cost - a.estimated_cost)
 
   // ── Daily cost by model ────────────────────────────────────────────────────
-  const daily: DailyCost[] = (stats.tokensByDate ?? []).map(d => {
+  // stats-cache.json uses "dailyModelTokens" in newer CC versions; "tokensByDate" in older ones
+  const daily: DailyCost[] = (stats.dailyModelTokens ?? stats.tokensByDate ?? []).map(d => {
     const costs: Record<string, number> = {}
     let dayTotal = 0
     for (const [model, tokens] of Object.entries(d.tokensByModel ?? {})) {
