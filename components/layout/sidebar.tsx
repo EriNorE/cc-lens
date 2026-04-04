@@ -3,22 +3,39 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Moon, Sun, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  PanelLeftClose,
+  PanelLeftOpen,
+  LayoutDashboard,
+  FolderOpen,
+  MessageSquare,
+  DollarSign,
+  Wrench,
+  Activity,
+  History,
+  ListTodo,
+  FileText,
+  Brain,
+  Settings,
+  Download,
+} from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 
 const NAV = [
-  { href: "/", label: "overview" },
-  { href: "/projects", label: "projects" },
-  { href: "/sessions", label: "sessions" },
-  { href: "/costs", label: "costs" },
-  { href: "/tools", label: "tools" },
-  { href: "/activity", label: "activity" },
-  { href: "/history", label: "history" },
-  { href: "/todos", label: "todos" },
-  { href: "/plans", label: "plans" },
-  { href: "/memory", label: "memory" },
-  { href: "/settings", label: "settings" },
-  { href: "/export", label: "export" },
+  { href: "/", label: "overview", icon: LayoutDashboard },
+  { href: "/projects", label: "projects", icon: FolderOpen },
+  { href: "/sessions", label: "sessions", icon: MessageSquare },
+  { href: "/costs", label: "costs", icon: DollarSign },
+  { href: "/tools", label: "tools", icon: Wrench },
+  { href: "/activity", label: "activity", icon: Activity },
+  { href: "/history", label: "history", icon: History },
+  { href: "/todos", label: "todos", icon: ListTodo },
+  { href: "/plans", label: "plans", icon: FileText },
+  { href: "/memory", label: "memory", icon: Brain },
+  { href: "/settings", label: "settings", icon: Settings },
+  { href: "/export", label: "export", icon: Download },
 ];
 
 const STORAGE_KEY = "cc-lens-sidebar";
@@ -77,7 +94,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-2 py-5 space-y-0.5 overflow-y-auto">
-        {NAV.map(({ href, label }) => {
+        {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link
@@ -92,13 +109,14 @@ export function Sidebar() {
                   : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/80",
               ].join(" ")}
             >
-              <span
-                className={
-                  active ? "text-sidebar-primary" : "text-sidebar-foreground/40"
-                }
-              >
-                ›
-              </span>
+              <Icon
+                className={[
+                  "w-4 h-4 shrink-0",
+                  active
+                    ? "text-sidebar-primary"
+                    : "text-sidebar-foreground/40",
+                ].join(" ")}
+              />
               {!collapsed && label}
             </Link>
           );
