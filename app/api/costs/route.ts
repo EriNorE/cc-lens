@@ -136,16 +136,23 @@ export async function GET() {
     .sort((a, b) => b.estimated_cost - a.estimated_cost)
     .slice(0, 20);
 
-  // ── Hourly cost for today (from JSONL sessions) ────────────────────────────
-  const today = new Date().toISOString().slice(0, 10);
+  // ── Hourly cost for last 24h (from JSONL sessions) ─────────────────────────
+  const now = new Date();
+  const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const hourlyMap = new Map<
     string,
     { costs: Record<string, number>; total: number }
   >();
   for (const s of sessions) {
     const ts = s.start_time ?? "";
-    if (!ts.startsWith(today)) continue;
-    const hour = ts.slice(11, 13) + ":00";
+    if (!ts) continue;
+    const sessionTime = new Date(ts);
+    if (sessionTime < cutoff24h) continue;
+    // Label: "MM-DD HH:00" for cross-day clarity
+    const mm = String(sessionTime.getMonth() + 1).padStart(2, "0");
+    const dd = String(sessionTime.getDate()).padStart(2, "0");
+    const hh = String(sessionTime.getHours()).padStart(2, "0");
+    const hour = `${mm}-${dd} ${hh}:00`;
     const cost = estimateCostFromUsage("claude-opus-4-6", {
       input_tokens: s.input_tokens ?? 0,
       output_tokens: s.output_tokens ?? 0,

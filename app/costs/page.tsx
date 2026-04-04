@@ -55,6 +55,13 @@ export default function CostsPage() {
     if (window === 365)
       return { cost: data.total_cost, savings: data.total_savings };
 
+    // For 1d, use hourly data (last 24h)
+    if (window === 1) {
+      let cost = 0;
+      for (const h of data.hourly ?? []) cost += h.total;
+      return { cost, savings: cost * 4.5 }; // rough cache savings estimate
+    }
+
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - window);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
@@ -64,7 +71,6 @@ export default function CostsPage() {
     for (const d of data.daily) {
       if (d.date >= cutoffStr) {
         cost += d.total;
-        // estimate savings from daily model costs vs full-price
         for (const [model, modelCost] of Object.entries(d.costs)) {
           const p = Object.entries(PRICING).find(
             ([k]) =>
@@ -76,7 +82,7 @@ export default function CostsPage() {
               p[1].cacheRead > 0
                 ? (p[1].input - p[1].cacheRead) / p[1].input
                 : 0;
-            savings += modelCost * ratio * 5; // rough estimate: cache read ~5x the billed cost
+            savings += modelCost * ratio * 5;
           }
         }
       }
