@@ -12,6 +12,7 @@ import type {
   CostAnalytics,
   ModelCostBreakdown,
   DailyCost,
+  HourlyCost,
   ProjectCost,
 } from "@/types/claude";
 
@@ -135,11 +136,38 @@ export async function GET() {
     .sort((a, b) => b.estimated_cost - a.estimated_cost)
     .slice(0, 20);
 
+  // ── Hourly cost for today (from JSONL sessions) ────────────────────────────
+  const today = new Date().toISOString().slice(0, 10);
+  const hourlyMap = new Map<
+    string,
+    { costs: Record<string, number>; total: number }
+  >();
+  for (const s of sessions) {
+    const ts = s.start_time ?? "";
+    if (!ts.startsWith(today)) continue;
+    const hour = ts.slice(11, 13) + ":00";
+    const cost = estimateCostFromUsage("claude-opus-4-6", {
+      input_tokens: s.input_tokens ?? 0,
+      output_tokens: s.output_tokens ?? 0,
+      cache_creation_input_tokens: s.cache_creation_input_tokens ?? 0,
+      cache_read_input_tokens: s.cache_read_input_tokens ?? 0,
+    });
+    const existing = hourlyMap.get(hour) ?? { costs: {}, total: 0 };
+    existing.total += cost;
+    existing.costs["claude-opus-4-6"] =
+      (existing.costs["claude-opus-4-6"] ?? 0) + cost;
+    hourlyMap.set(hour, existing);
+  }
+  const hourly: HourlyCost[] = [...hourlyMap.entries()]
+    .map(([hour, { costs, total }]) => ({ hour, costs, total }))
+    .sort((a, b) => a.hour.localeCompare(b.hour));
+
   const result: CostAnalytics = {
     total_cost: totalCost,
     total_savings: totalSavings,
     models,
     daily,
+    hourly,
     by_project,
   };
   return NextResponse.json(result);

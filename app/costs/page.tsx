@@ -140,10 +140,11 @@ export default function CostsPage() {
             </div>
 
             {/* Cost over time */}
-            {data.daily.length > 0 && (
+            {(data.daily.length > 0 || (data.hourly ?? []).length > 0) && (
               <Card title="Cost Over Time">
                 <CostOverTimeChart
                   daily={data.daily}
+                  hourly={data.hourly ?? []}
                   window={window}
                   onWindowChange={setWindow}
                 />
