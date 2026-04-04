@@ -6,7 +6,6 @@ const net = require("net");
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
-const crypto = require("crypto");
 
 const PKG_DIR = path.join(__dirname, "..");
 const CACHE_DIR = path.join(os.homedir(), ".cc-lens");
@@ -71,7 +70,6 @@ const SRC_FILES = [
   "tsconfig.json",
   "postcss.config.mjs",
   "components.json",
-  "proxy.ts",
 ];
 
 function syncSource(pkg) {
@@ -161,7 +159,6 @@ async function main() {
     parseInt(process.env.CC_LENS_PORT, 10) || 33033,
   );
   const host = process.env.CC_LENS_HOST || "127.0.0.1";
-  const token = process.env.CC_LENS_PASSWORD || "cc-lens2026";
   const url = `http://localhost:${port}`;
 
   if (host !== "127.0.0.1" && host !== "::1" && host !== "localhost") {
@@ -170,8 +167,6 @@ async function main() {
     );
   }
   console.log(`  ${DIM}Starting server on${R} ${O2}${B}${url}${R}\n`);
-  console.log(`  ${O}🔑${R} Access token: ${B}${token}${R}`);
-  console.log(`  ${DIM}   (set CC_LENS_PASSWORD to use your own)${R}\n`);
 
   // On Windows, mixing 'inherit' + 'pipe' in stdio causes EINVAL. Use 'ignore'
   // for stdin — Next.js dev server doesn't need user input from stdin.
@@ -185,7 +180,7 @@ async function main() {
         "pipe",
         "pipe",
       ],
-      env: { ...process.env, PORT: String(port), CC_LENS_TOKEN: token },
+      env: { ...process.env, PORT: String(port) },
     },
   );
 
@@ -195,7 +190,7 @@ async function main() {
     if (!opened && /Local:|ready|started server/i.test(text)) {
       opened = true;
       console.log(`\n  ${O}✓${R}  Opening ${B}${url}${R} in your browser…\n`);
-      openBrowser(`${url}?token=${token}`);
+      openBrowser(url);
     }
   }
 
