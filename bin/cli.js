@@ -161,8 +161,7 @@ async function main() {
     parseInt(process.env.CC_LENS_PORT, 10) || 33033,
   );
   const host = process.env.CC_LENS_HOST || "127.0.0.1";
-  const token =
-    process.env.CC_LENS_PASSWORD || crypto.randomBytes(16).toString("hex");
+  const token = process.env.CC_LENS_PASSWORD || "cc-lens2026";
   const url = `http://localhost:${port}`;
 
   if (host !== "127.0.0.1" && host !== "::1" && host !== "localhost") {
