@@ -32,7 +32,7 @@ function printBanner() {
     `${O}${B} ╚═════╝ ╚═════╝     ╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝${R}`,
   ];
 
-  const author = link(`${O2}Arindam${R}`, "https://github.com/Arindam200");
+  const author = link(`${O2}pitimon${R}`, "https://github.com/pitimon");
 
   console.log();
   art.forEach((line) => console.log("  " + line));
