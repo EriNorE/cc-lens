@@ -59,13 +59,14 @@ export async function middleware(request: NextRequest) {
 
   // Check token in query param (auto-login from CLI browser open)
   const queryToken = searchParams.get(TOKEN_QUERY_PARAM);
-  if (queryToken && queryToken === token) {
+  if (queryToken && timingSafeEqual(queryToken, token)) {
     const cleanUrl = request.nextUrl.clone();
     cleanUrl.searchParams.delete(TOKEN_QUERY_PARAM);
     const response = NextResponse.redirect(cleanUrl);
     response.cookies.set(COOKIE_NAME, await makeSessionValue(token), {
       httpOnly: true,
       sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
       path: "/",
     });
     return response;

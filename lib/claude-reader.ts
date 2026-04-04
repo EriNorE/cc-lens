@@ -8,6 +8,13 @@ import type {
   HistoryEntry,
 } from "@/types/claude";
 import { slugToPath } from "@/lib/decode";
+import {
+  readCache,
+  writeCache,
+  getCachedEntry,
+  setCachedEntry,
+  pruneCache,
+} from "@/lib/cache";
 
 function stripXmlTags(text: string): string {
   return text
@@ -60,8 +67,6 @@ export async function readStatsCache(): Promise<StatsCache | null> {
 // ─── Sessions from Project JSONL (primary source) ──────────────────────────────
 
 export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
-  const { readCache, writeCache, getCachedEntry, setCachedEntry, pruneCache } =
-    await import("@/lib/cache");
   const results: SessionMeta[] = [];
   const cache = await readCache();
   const validPaths = new Set<string>();

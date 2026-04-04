@@ -163,6 +163,11 @@ async function main() {
     process.env.CC_LENS_PASSWORD || crypto.randomBytes(16).toString("hex");
   const url = `http://localhost:${port}`;
 
+  if (host !== "127.0.0.1" && host !== "::1" && host !== "localhost") {
+    console.log(
+      `  \x1b[33m⚠  WARNING: binding to ${host} — dashboard accessible on network\x1b[0m\n`,
+    );
+  }
   console.log(`  ${DIM}Starting server on${R} ${O2}${B}${url}${R}\n`);
   console.log(`  ${O}🔑${R} Access token: ${B}${token}${R}`);
   console.log(`  ${DIM}   (set CC_LENS_PASSWORD to use your own)${R}\n`);
