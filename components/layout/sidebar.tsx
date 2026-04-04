@@ -1,75 +1,128 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Moon, Sun } from 'lucide-react'
-import { useTheme } from '@/components/theme-provider'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Moon, Sun, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 
 const NAV = [
-  { href: '/',          label: 'overview'  },
-  { href: '/projects',  label: 'projects'  },
-  { href: '/sessions',  label: 'sessions'  },
-  { href: '/costs',     label: 'costs'     },
-  { href: '/tools',     label: 'tools'     },
-  { href: '/activity',  label: 'activity'  },
-  { href: '/history',   label: 'history'   },
-  { href: '/todos',     label: 'todos'     },
-  { href: '/plans',     label: 'plans'     },
-  { href: '/memory',    label: 'memory'    },
-  { href: '/settings',  label: 'settings'  },
-  { href: '/export',    label: 'export'    },
-]
+  { href: "/", label: "overview" },
+  { href: "/projects", label: "projects" },
+  { href: "/sessions", label: "sessions" },
+  { href: "/costs", label: "costs" },
+  { href: "/tools", label: "tools" },
+  { href: "/activity", label: "activity" },
+  { href: "/history", label: "history" },
+  { href: "/todos", label: "todos" },
+  { href: "/plans", label: "plans" },
+  { href: "/memory", label: "memory" },
+  { href: "/settings", label: "settings" },
+  { href: "/export", label: "export" },
+];
+
+const STORAGE_KEY = "cc-lens-sidebar";
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const { theme, toggle } = useTheme()
+  const pathname = usePathname();
+  const { theme, toggle } = useTheme();
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === "collapsed") setCollapsed(true);
+  }, []);
+
+  function handleToggle() {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem(STORAGE_KEY, next ? "collapsed" : "expanded");
+    // Notify layout to adjust margin
+    window.dispatchEvent(
+      new CustomEvent("sidebar-toggle", { detail: { collapsed: next } }),
+    );
+  }
 
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar z-40">
-      <div className="px-4 pt-5 pb-4 border-b border-sidebar-border">
-        <span
-          className="text-[#c2703a] text-[12px] leading-none whitespace-nowrap"
-          style={{
-            fontFamily: 'var(--font-press-start)',
-            WebkitTextStroke: '0.5px #c2703a',
-            textShadow: '1px 1px 0 #7a3a1a',
-          }}
+    <aside
+      className={[
+        "hidden md:flex fixed left-0 top-0 h-screen flex-col border-r border-sidebar-border bg-sidebar z-40 transition-all duration-200",
+        collapsed ? "w-14" : "w-56",
+      ].join(" ")}
+    >
+      <div className="px-3 pt-5 pb-4 border-b border-sidebar-border flex items-center justify-between min-h-[57px]">
+        {!collapsed && (
+          <span
+            className="text-[#c2703a] text-[12px] leading-none whitespace-nowrap"
+            style={{
+              fontFamily: "var(--font-press-start)",
+              WebkitTextStroke: "0.5px #c2703a",
+              textShadow: "1px 1px 0 #7a3a1a",
+            }}
+          >
+            Claude Code Lens
+          </span>
+        )}
+        <button
+          onClick={handleToggle}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="p-1.5 rounded text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
         >
-          Claude Code Lens
-        </span>
+          {collapsed ? (
+            <PanelLeftOpen className="w-4 h-4" />
+          ) : (
+            <PanelLeftClose className="w-4 h-4" />
+          )}
+        </button>
       </div>
 
-      <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-2 py-5 space-y-0.5 overflow-y-auto">
         {NAV.map(({ href, label }) => {
-          const active = pathname === href
+          const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
+              title={collapsed ? label : undefined}
               className={[
-                'flex items-center gap-2.5 px-4 py-3 rounded-r text-base font-mono transition-colors relative',
+                "flex items-center gap-2.5 rounded-r text-base font-mono transition-colors relative",
+                collapsed ? "justify-center px-2 py-3" : "px-4 py-3",
                 active
-                  ? 'text-sidebar-primary bg-sidebar-accent border-l-2 border-l-sidebar-primary pl-[14px]'
-                  : 'text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/80',
-              ].join(' ')}
+                  ? "text-sidebar-primary bg-sidebar-accent border-l-2 border-l-sidebar-primary"
+                  : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/80",
+              ].join(" ")}
             >
-              <span className={active ? 'text-sidebar-primary' : 'text-sidebar-foreground/40'}>›</span>
-              {label}
+              <span
+                className={
+                  active ? "text-sidebar-primary" : "text-sidebar-foreground/40"
+                }
+              >
+                ›
+              </span>
+              {!collapsed && label}
             </Link>
-          )
+          );
         })}
       </nav>
 
-      <div className="px-5 py-4 border-t border-sidebar-border flex items-center justify-between">
-        <p className="text-sm text-sidebar-foreground/50 font-mono">Made by Arindam</p>
+      <div className="px-3 py-4 border-t border-sidebar-border flex items-center justify-between">
+        {!collapsed && (
+          <p className="text-sm text-sidebar-foreground/50 font-mono">
+            Made by Arindam
+          </p>
+        )}
         <button
           onClick={toggle}
           aria-label="Toggle theme"
           className="p-1.5 rounded text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors cursor-pointer"
         >
-          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
         </button>
       </div>
     </aside>
-  )
+  );
 }
