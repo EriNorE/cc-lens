@@ -42,7 +42,7 @@ function timingSafeEqual(a: string, b: string): boolean {
   return result === 0;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
   if (isPublic(pathname)) return NextResponse.next();

@@ -71,7 +71,7 @@ const SRC_FILES = [
   "tsconfig.json",
   "postcss.config.mjs",
   "components.json",
-  "middleware.ts",
+  "proxy.ts",
 ];
 
 function syncSource(pkg) {
