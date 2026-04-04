@@ -55,40 +55,24 @@ export default function CostsPage() {
     if (window === 365)
       return { cost: data.total_cost, savings: data.total_savings };
 
-    // For 1d, use hourly data (last 24h)
+    // For 1d, sum hourly data (last 24h)
     if (window === 1) {
       let cost = 0;
       for (const h of data.hourly ?? []) cost += h.total;
-      return { cost, savings: cost * 4.5 }; // rough cache savings estimate
+      return { cost, savings: 0 };
     }
 
+    // For 7d/30d/90d, sum daily data
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - window);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
 
     let cost = 0;
-    let savings = 0;
     for (const d of data.daily) {
-      if (d.date >= cutoffStr) {
-        cost += d.total;
-        for (const [model, modelCost] of Object.entries(d.costs)) {
-          const p = Object.entries(PRICING).find(
-            ([k]) =>
-              model.includes(k) ||
-              k.includes(model.split("-").slice(0, 3).join("-")),
-          );
-          if (p) {
-            const ratio =
-              p[1].cacheRead > 0
-                ? (p[1].input - p[1].cacheRead) / p[1].input
-                : 0;
-            savings += modelCost * ratio * 5;
-          }
-        }
-      }
+      if (d.date >= cutoffStr) cost += d.total;
     }
 
-    return { cost, savings };
+    return { cost, savings: 0 };
   }, [data, window]);
 
   return (
@@ -125,24 +109,28 @@ export default function CostsPage() {
                   {formatCost(filtered.cost)}
                 </p>
               </div>
-              <span className="text-border">·</span>
-              <div>
-                <p className="text-[12px] text-muted-foreground uppercase tracking-wider">
-                  Cache Savings
-                </p>
-                <p className="text-xl font-bold text-[#34d399]">
-                  {formatCost(filtered.savings)}
-                </p>
-              </div>
-              <span className="text-border">·</span>
-              <div>
-                <p className="text-[12px] text-muted-foreground uppercase tracking-wider">
-                  Without Cache
-                </p>
-                <p className="text-xl font-bold text-red-400">
-                  {formatCost(filtered.cost + filtered.savings)}
-                </p>
-              </div>
+              {filtered.savings > 0 && (
+                <>
+                  <span className="text-border">·</span>
+                  <div>
+                    <p className="text-[12px] text-muted-foreground uppercase tracking-wider">
+                      Cache Savings
+                    </p>
+                    <p className="text-xl font-bold text-[#34d399]">
+                      {formatCost(filtered.savings)}
+                    </p>
+                  </div>
+                  <span className="text-border">·</span>
+                  <div>
+                    <p className="text-[12px] text-muted-foreground uppercase tracking-wider">
+                      Without Cache
+                    </p>
+                    <p className="text-xl font-bold text-red-400">
+                      {formatCost(filtered.cost + filtered.savings)}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Cost over time */}

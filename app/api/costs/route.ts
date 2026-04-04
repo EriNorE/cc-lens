@@ -5,7 +5,6 @@ import {
   estimateCostFromUsage,
   cacheEfficiency,
   getPricing,
-  PRICING,
 } from "@/lib/pricing";
 import { projectDisplayName } from "@/lib/decode";
 import type {
@@ -31,7 +30,7 @@ export async function GET() {
     );
   }
 
-  // ── Per-model breakdown ────────────────────────────────────────────────────
+  // ── Per-model breakdown (from stats-cache — authoritative totals) ─────────
   let totalCost = 0;
   let totalSavings = 0;
   const models: ModelCostBreakdown[] = Object.entries(stats.modelUsage ?? {})
@@ -53,44 +52,51 @@ export async function GET() {
     })
     .sort((a, b) => b.estimated_cost - a.estimated_cost);
 
-  // ── Daily cost from stats-cache ───────────────────────────────────────────
+  // ── Daily + Hourly cost — ALL from JSONL sessions (single source of truth) ─
+  // This ensures 1d/7d/30d/90d/All use the same calculation method
   const dailyMap = new Map<
     string,
     { costs: Record<string, number>; total: number }
   >();
+  const now = new Date();
+  const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const hourlyMap = new Map<
+    string,
+    { costs: Record<string, number>; total: number }
+  >();
 
-  for (const d of stats.dailyModelTokens ?? stats.tokensByDate ?? []) {
-    const costs: Record<string, number> = {};
-    let dayTotal = 0;
-    for (const [model, tokens] of Object.entries(d.tokensByModel ?? {})) {
-      const p = getPricing(model);
-      const cost = tokens * p.input * 0.5 + tokens * p.output * 0.5;
-      costs[model] = cost;
-      dayTotal += cost;
-    }
-    dailyMap.set(d.date, { costs, total: dayTotal });
-  }
-
-  // ── Fill gaps from JSONL sessions (covers dates after stats-cache stops) ──
   for (const s of sessions) {
-    const date = (s.start_time ?? "").slice(0, 10);
-    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-    if (dailyMap.has(date)) continue; // stats-cache data is more accurate
+    const ts = s.start_time ?? "";
+    if (!ts) continue;
+    const date = ts.slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
 
-    const cost = estimateCostFromUsage("claude-opus-4-6", {
-      input_tokens: s.input_tokens ?? 0,
-      output_tokens: s.output_tokens ?? 0,
-      cache_creation_input_tokens: s.cache_creation_input_tokens ?? 0,
-      cache_read_input_tokens: s.cache_read_input_tokens ?? 0,
-    });
+    // Use simple cost model: input + output tokens only (no cache tokens)
+    // This matches what the user actually "spent" in API-equivalent terms
+    // Cache tokens inflate the number and confuse the per-day view
+    const p = getPricing("claude-opus-4-6");
+    const cost =
+      (s.input_tokens ?? 0) * p.input + (s.output_tokens ?? 0) * p.output;
 
-    const existing = dailyMap.get(date);
-    if (existing) {
-      existing.total += cost;
-      existing.costs["claude-opus-4-6"] =
-        (existing.costs["claude-opus-4-6"] ?? 0) + cost;
-    } else {
-      dailyMap.set(date, { costs: { "claude-opus-4-6": cost }, total: cost });
+    // Daily aggregation
+    const dayEntry = dailyMap.get(date) ?? { costs: {}, total: 0 };
+    dayEntry.total += cost;
+    dayEntry.costs["claude-opus-4-6"] =
+      (dayEntry.costs["claude-opus-4-6"] ?? 0) + cost;
+    dailyMap.set(date, dayEntry);
+
+    // Hourly aggregation (last 24h only)
+    const sessionTime = new Date(ts);
+    if (sessionTime >= cutoff24h) {
+      const mm = String(sessionTime.getMonth() + 1).padStart(2, "0");
+      const dd = String(sessionTime.getDate()).padStart(2, "0");
+      const hh = String(sessionTime.getHours()).padStart(2, "0");
+      const hourLabel = `${mm}-${dd} ${hh}:00`;
+      const hourEntry = hourlyMap.get(hourLabel) ?? { costs: {}, total: 0 };
+      hourEntry.total += cost;
+      hourEntry.costs["claude-opus-4-6"] =
+        (hourEntry.costs["claude-opus-4-6"] ?? 0) + cost;
+      hourlyMap.set(hourLabel, hourEntry);
     }
   }
 
@@ -98,23 +104,21 @@ export async function GET() {
     .map(([date, { costs, total }]) => ({ date, costs, total }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
+  const hourly: HourlyCost[] = [...hourlyMap.entries()]
+    .map(([hour, { costs, total }]) => ({ hour, costs, total }))
+    .sort((a, b) => a.hour.localeCompare(b.hour));
+
   // ── Cost by project ────────────────────────────────────────────────────────
   const projectMap = new Map<
     string,
     { cost: number; input: number; output: number }
   >();
   for (const s of sessions) {
-    const pp = s.project_path ?? "";
-    const slug = pp;
+    const slug = s.project_path ?? "";
     const existing = projectMap.get(slug) ?? { cost: 0, input: 0, output: 0 };
-    const cost = estimateTotalCostFromModel("claude-opus-4-6", {
-      inputTokens: s.input_tokens ?? 0,
-      outputTokens: s.output_tokens ?? 0,
-      cacheCreationInputTokens: s.cache_creation_input_tokens ?? 0,
-      cacheReadInputTokens: s.cache_read_input_tokens ?? 0,
-      costUSD: 0,
-      webSearchRequests: 0,
-    });
+    const p = getPricing("claude-opus-4-6");
+    const cost =
+      (s.input_tokens ?? 0) * p.input + (s.output_tokens ?? 0) * p.output;
     projectMap.set(slug, {
       cost: existing.cost + cost,
       input: existing.input + (s.input_tokens ?? 0),
@@ -123,51 +127,15 @@ export async function GET() {
   }
 
   const by_project: ProjectCost[] = [...projectMap.entries()]
-    .map(([slug, data]) => {
-      const projectPath = slug;
-      return {
-        slug,
-        display_name: projectDisplayName(projectPath),
-        estimated_cost: data.cost,
-        input_tokens: data.input,
-        output_tokens: data.output,
-      };
-    })
+    .map(([slug, data]) => ({
+      slug,
+      display_name: projectDisplayName(slug),
+      estimated_cost: data.cost,
+      input_tokens: data.input,
+      output_tokens: data.output,
+    }))
     .sort((a, b) => b.estimated_cost - a.estimated_cost)
     .slice(0, 20);
-
-  // ── Hourly cost for last 24h (from JSONL sessions) ─────────────────────────
-  const now = new Date();
-  const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const hourlyMap = new Map<
-    string,
-    { costs: Record<string, number>; total: number }
-  >();
-  for (const s of sessions) {
-    const ts = s.start_time ?? "";
-    if (!ts) continue;
-    const sessionTime = new Date(ts);
-    if (sessionTime < cutoff24h) continue;
-    // Label: "MM-DD HH:00" for cross-day clarity
-    const mm = String(sessionTime.getMonth() + 1).padStart(2, "0");
-    const dd = String(sessionTime.getDate()).padStart(2, "0");
-    const hh = String(sessionTime.getHours()).padStart(2, "0");
-    const hour = `${mm}-${dd} ${hh}:00`;
-    const cost = estimateCostFromUsage("claude-opus-4-6", {
-      input_tokens: s.input_tokens ?? 0,
-      output_tokens: s.output_tokens ?? 0,
-      cache_creation_input_tokens: s.cache_creation_input_tokens ?? 0,
-      cache_read_input_tokens: s.cache_read_input_tokens ?? 0,
-    });
-    const existing = hourlyMap.get(hour) ?? { costs: {}, total: 0 };
-    existing.total += cost;
-    existing.costs["claude-opus-4-6"] =
-      (existing.costs["claude-opus-4-6"] ?? 0) + cost;
-    hourlyMap.set(hour, existing);
-  }
-  const hourly: HourlyCost[] = [...hourlyMap.entries()]
-    .map(([hour, { costs, total }]) => ({ hour, costs, total }))
-    .sort((a, b) => a.hour.localeCompare(b.hour));
 
   const result: CostAnalytics = {
     total_cost: totalCost,
