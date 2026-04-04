@@ -1,7 +1,6 @@
 // middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import crypto from "crypto";
 
 const COOKIE_NAME = "cc-lens-session";
 const TOKEN_QUERY_PARAM = "token";
@@ -15,36 +14,47 @@ function isPublic(pathname: string): boolean {
   );
 }
 
-function makeSessionValue(token: string): string {
-  return crypto
-    .createHmac("sha256", token)
-    .update("cc-lens-session")
-    .digest("hex");
+async function makeSessionValue(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(token),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode("cc-lens-session"),
+  );
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
-export function middleware(request: NextRequest) {
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
   if (isPublic(pathname)) return NextResponse.next();
 
   const token = process.env.CC_LENS_TOKEN ?? "";
-  if (!token) return NextResponse.next(); // no auth configured
+  if (!token) return NextResponse.next();
 
   // Check session cookie
   const cookie = request.cookies.get(COOKIE_NAME)?.value;
   if (cookie) {
-    const expected = makeSessionValue(token);
-    if (cookie.length === expected.length) {
-      try {
-        const valid = crypto.timingSafeEqual(
-          Buffer.from(cookie),
-          Buffer.from(expected),
-        );
-        if (valid) return NextResponse.next();
-      } catch {
-        /* length mismatch, fall through */
-      }
-    }
+    const expected = await makeSessionValue(token);
+    if (timingSafeEqual(cookie, expected)) return NextResponse.next();
   }
 
   // Check token in query param (auto-login from CLI browser open)
@@ -53,7 +63,7 @@ export function middleware(request: NextRequest) {
     const cleanUrl = request.nextUrl.clone();
     cleanUrl.searchParams.delete(TOKEN_QUERY_PARAM);
     const response = NextResponse.redirect(cleanUrl);
-    response.cookies.set(COOKIE_NAME, makeSessionValue(token), {
+    response.cookies.set(COOKIE_NAME, await makeSessionValue(token), {
       httpOnly: true,
       sameSite: "strict",
       path: "/",
