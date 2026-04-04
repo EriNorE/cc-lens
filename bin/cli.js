@@ -157,7 +157,9 @@ async function main() {
     fs.writeFileSync(versionFile, pkg.version);
   }
 
-  const port = await findFreePort(3000);
+  const port = await findFreePort(
+    parseInt(process.env.CC_LENS_PORT, 10) || 33033,
+  );
   const host = process.env.CC_LENS_HOST || "127.0.0.1";
   const token =
     process.env.CC_LENS_PASSWORD || crypto.randomBytes(16).toString("hex");
