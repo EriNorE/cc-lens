@@ -60,3 +60,45 @@ export function pruneCache(cache: CacheData, validPaths: Set<string>): void {
     }
   }
 }
+
+// ─── Project Path Cache ─────────────────────────────────────────────────────
+
+const PROJECT_PATH_FILE = path.join(CACHE_DIR, "project-paths.json");
+
+interface ProjectPathCache {
+  version: 1;
+  paths: Record<string, string>;
+}
+
+export async function readProjectPathCache(): Promise<ProjectPathCache> {
+  try {
+    const raw = await fs.readFile(PROJECT_PATH_FILE, "utf-8");
+    const data = JSON.parse(raw) as ProjectPathCache;
+    if (data.version === 1 && data.paths) return data;
+  } catch {
+    /* missing or corrupt */
+  }
+  return { version: 1, paths: {} };
+}
+
+export async function writeProjectPathCache(
+  data: ProjectPathCache,
+): Promise<void> {
+  await fs.mkdir(CACHE_DIR, { recursive: true });
+  await fs.writeFile(PROJECT_PATH_FILE, JSON.stringify(data));
+}
+
+export function getCachedProjectPath(
+  cache: ProjectPathCache,
+  slug: string,
+): string | null {
+  return cache.paths[slug] ?? null;
+}
+
+export function setCachedProjectPath(
+  cache: ProjectPathCache,
+  slug: string,
+  projectPath: string,
+): void {
+  cache.paths[slug] = projectPath;
+}

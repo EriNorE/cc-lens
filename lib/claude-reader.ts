@@ -14,6 +14,10 @@ import {
   getCachedEntry,
   setCachedEntry,
   pruneCache,
+  readProjectPathCache,
+  writeProjectPathCache,
+  getCachedProjectPath,
+  setCachedProjectPath,
 } from "@/lib/cache";
 
 function stripXmlTags(text: string): string {
@@ -66,44 +70,83 @@ export async function readStatsCache(): Promise<StatsCache | null> {
 
 // ─── Sessions from Project JSONL (primary source) ──────────────────────────────
 
+/** Process a single file: stat → cache check → parse if needed */
+async function processFile(
+  filePath: string,
+  projectPath: string,
+  slug: string,
+  cache: Parameters<typeof getCachedEntry>[0],
+): Promise<SessionMeta | null> {
+  try {
+    const stat = await fs.stat(filePath);
+    const cached = getCachedEntry(cache, filePath, stat.mtimeMs);
+    if (cached) return cached;
+    const sessionId = path.basename(filePath, ".jsonl");
+    const meta = await deriveSessionMetaFromJSONL(
+      filePath,
+      sessionId,
+      projectPath,
+      slug,
+    );
+    if (meta) {
+      setCachedEntry(cache, filePath, stat.mtimeMs, stat.size, meta);
+      return meta;
+    }
+  } catch {
+    /* skip unreadable file */
+  }
+  return null;
+}
+
 export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
-  const results: SessionMeta[] = [];
-  const cache = await readCache();
+  const [cache, pathCache] = await Promise.all([
+    readCache(),
+    readProjectPathCache(),
+  ]);
   const validPaths = new Set<string>();
 
   try {
     const slugs = await listProjectSlugs();
-    for (const slug of slugs) {
-      const projectPath = await resolveProjectPath(slug);
-      const files = await listProjectJSONLFiles(slug);
-      for (const filePath of files) {
-        validPaths.add(filePath);
-        try {
-          const stat = await fs.stat(filePath);
-          const cached = getCachedEntry(cache, filePath, stat.mtimeMs);
-          if (cached) {
-            results.push(cached);
-            continue;
-          }
-          const sessionId = path.basename(filePath, ".jsonl");
-          const meta = await deriveSessionMetaFromJSONL(
-            filePath,
-            sessionId,
-            projectPath,
-            slug,
-          );
-          if (meta) {
-            setCachedEntry(cache, filePath, stat.mtimeMs, stat.size, meta);
-            results.push(meta);
-          }
-        } catch {
-          /* skip unreadable file */
+
+    // Resolve project paths with cache (parallel)
+    const projectPaths = await Promise.all(
+      slugs.map(async (slug) => {
+        const cached = getCachedProjectPath(pathCache, slug);
+        if (cached) return cached;
+        const resolved = await resolveProjectPath(slug);
+        setCachedProjectPath(pathCache, slug, resolved);
+        return resolved;
+      }),
+    );
+
+    // Collect all files across all projects
+    const allFiles: { filePath: string; projectPath: string; slug: string }[] =
+      [];
+    await Promise.all(
+      slugs.map(async (slug, i) => {
+        const files = await listProjectJSONLFiles(slug);
+        for (const filePath of files) {
+          validPaths.add(filePath);
+          allFiles.push({ filePath, projectPath: projectPaths[i], slug });
         }
+      }),
+    );
+
+    // Process all files in parallel (batched to avoid fd exhaustion)
+    const BATCH_SIZE = 50;
+    const results: SessionMeta[] = [];
+    for (let i = 0; i < allFiles.length; i += BATCH_SIZE) {
+      const batch = allFiles.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map((f) => processFile(f.filePath, f.projectPath, f.slug, cache)),
+      );
+      for (const meta of batchResults) {
+        if (meta) results.push(meta);
       }
     }
 
     pruneCache(cache, validPaths);
-    await writeCache(cache);
+    await Promise.all([writeCache(cache), writeProjectPathCache(pathCache)]);
 
     return results.sort(
       (a, b) =>
@@ -696,6 +739,19 @@ export async function readMemories(): Promise<MemoryEntry[]> {
 // ─── Storage size ─────────────────────────────────────────────────────────────
 
 export async function getClaudeStorageBytes(): Promise<number> {
+  // Use du for speed — Node.js recursive stat on 4.9GB dir takes ~4s vs ~0.3s for du
+  try {
+    const { execFile } = await import("child_process");
+    const { promisify } = await import("util");
+    const execFileAsync = promisify(execFile);
+    const { stdout } = await execFileAsync("du", ["-sk", CLAUDE_DIR]);
+    const kb = parseInt(stdout.split("\t")[0], 10);
+    if (!isNaN(kb)) return kb * 1024;
+  } catch {
+    /* fall through to Node.js fallback */
+  }
+
+  // Fallback: Node.js recursive walk (slow on large dirs)
   async function dirSize(dirPath: string): Promise<number> {
     let total = 0;
     try {
