@@ -253,6 +253,9 @@ export interface DailyCost {
   date: string;
   costs: Record<string, number>;
   total: number;
+  cache_read_cost: number;
+  cache_write_cost: number;
+  cache_savings: number;
 }
 
 export interface ProjectCost {
@@ -267,6 +270,9 @@ export interface HourlyCost {
   hour: string; // "HH:00"
   costs: Record<string, number>;
   total: number;
+  cache_read_cost: number;
+  cache_write_cost: number;
+  cache_savings: number;
 }
 
 export interface CostAnalytics {

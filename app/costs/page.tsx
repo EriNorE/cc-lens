@@ -17,6 +17,7 @@ import {
   filterDailyByWindow,
   sumDailyCost,
   sumHourlyCost,
+  sumCacheBreakdown,
 } from "@/lib/costs-compute";
 import type { CostAnalytics } from "@/types/claude";
 
@@ -65,16 +66,27 @@ export default function CostsPage() {
 
     // 1d: sum hourly data (last 24h)
     if (costWindow === 1) {
-      return { cost: sumHourlyCost(data.hourly ?? []), savings: 0 };
+      const hrs = data.hourly ?? [];
+      const cache = sumCacheBreakdown(hrs);
+      return {
+        cost: sumHourlyCost(hrs),
+        cacheReadCost: cache.cacheReadCost,
+        cacheWriteCost: cache.cacheWriteCost,
+        savings: cache.cacheSavings,
+      };
     }
 
     // 7d/30d/90d/All: use shared filtering utility (single source of truth)
     const days = filterDailyByWindow(data.daily, costWindow);
     const cost = sumDailyCost(days);
-    // For "All": fall back to stats-cache if JSONL daily is empty
+    const cache = sumCacheBreakdown(days);
     const finalCost = costWindow === 365 && cost === 0 ? data.total_cost : cost;
-    const savings = costWindow === 365 ? data.total_savings : 0;
-    return { cost: finalCost, savings };
+    return {
+      cost: finalCost,
+      cacheReadCost: cache.cacheReadCost,
+      cacheWriteCost: cache.cacheWriteCost,
+      savings: cache.cacheSavings,
+    };
   }, [data, costWindow]);
 
   return (
@@ -110,13 +122,12 @@ export default function CostsPage() {
                 <p className="text-2xl font-bold text-[#d97706]">
                   {formatCost(filtered.cost)}
                 </p>
-                {costWindow === 365 &&
-                  data.cache_read_cost + data.cache_write_cost > 0 && (
-                    <p className="text-[11px] text-muted-foreground/60 font-mono mt-0.5">
-                      incl. {formatCost(data.cache_read_cost)} cache read +{" "}
-                      {formatCost(data.cache_write_cost)} cache write
-                    </p>
-                  )}
+                {filtered.cacheReadCost + filtered.cacheWriteCost > 0 && (
+                  <p className="text-[11px] text-muted-foreground/60 font-mono mt-0.5">
+                    incl. {formatCost(filtered.cacheReadCost)} cache read +{" "}
+                    {formatCost(filtered.cacheWriteCost)} cache write
+                  </p>
+                )}
               </div>
               {filtered.savings > 0 && (
                 <>

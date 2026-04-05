@@ -53,22 +53,20 @@ export async function GET() {
 
   // ── Daily + Hourly cost — ALL from JSONL sessions (single source of truth) ─
   // This ensures 1d/7d/30d/90d/All use the same calculation method
-  const dailyMap = new Map<
-    string,
-    { costs: Record<string, number>; total: number }
-  >();
+  type CostBucket = {
+    costs: Record<string, number>;
+    total: number;
+    cache_read_cost: number;
+    cache_write_cost: number;
+    cache_savings: number;
+  };
+  const dailyMap = new Map<string, CostBucket>();
   const now = new Date();
   const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const hourlyMap = new Map<
-    string,
-    { costs: Record<string, number>; total: number }
-  >();
+  const hourlyMap = new Map<string, CostBucket>();
 
-  // Track cache cost breakdown for hero subtitle (shown on "All" window only).
-  // Headline cost includes all 4 token types by design — cache_read IS a real
-  // Anthropic charge, just 10x cheaper than regular input.
-  // NOTE: These are summed from JSONL sessions, not the stats-cache.
-  // They may differ slightly from total_cost when the stats cache is stale.
+  // Track all-time cache cost totals.
+  // NOTE: Summed from JSONL sessions, not stats-cache — may differ when stale.
   let totalCacheReadCost = 0;
   let totalCacheWriteCost = 0;
 
@@ -87,12 +85,24 @@ export async function GET() {
       (s.output_tokens ?? 0) * p.output +
       cacheWriteCost +
       cacheReadCost;
+    const cacheSavings =
+      (s.cache_read_input_tokens ?? 0) * (p.input - p.cacheRead);
     totalCacheReadCost += cacheReadCost;
     totalCacheWriteCost += cacheWriteCost;
 
     // Daily aggregation
-    const dayEntry = dailyMap.get(date) ?? { costs: {}, total: 0 };
+    const emptyBucket = (): CostBucket => ({
+      costs: {},
+      total: 0,
+      cache_read_cost: 0,
+      cache_write_cost: 0,
+      cache_savings: 0,
+    });
+    const dayEntry = dailyMap.get(date) ?? emptyBucket();
     dayEntry.total += cost;
+    dayEntry.cache_read_cost += cacheReadCost;
+    dayEntry.cache_write_cost += cacheWriteCost;
+    dayEntry.cache_savings += cacheSavings;
     dayEntry.costs[sessionModel] = (dayEntry.costs[sessionModel] ?? 0) + cost;
     dailyMap.set(date, dayEntry);
 
@@ -103,8 +113,11 @@ export async function GET() {
       const dd = String(sessionTime.getDate()).padStart(2, "0");
       const hh = String(sessionTime.getHours()).padStart(2, "0");
       const hourLabel = `${mm}-${dd} ${hh}:00`;
-      const hourEntry = hourlyMap.get(hourLabel) ?? { costs: {}, total: 0 };
+      const hourEntry = hourlyMap.get(hourLabel) ?? emptyBucket();
       hourEntry.total += cost;
+      hourEntry.cache_read_cost += cacheReadCost;
+      hourEntry.cache_write_cost += cacheWriteCost;
+      hourEntry.cache_savings += cacheSavings;
       hourEntry.costs[sessionModel] =
         (hourEntry.costs[sessionModel] ?? 0) + cost;
       hourlyMap.set(hourLabel, hourEntry);
@@ -112,11 +125,25 @@ export async function GET() {
   }
 
   const daily: DailyCost[] = [...dailyMap.entries()]
-    .map(([date, { costs, total }]) => ({ date, costs, total }))
+    .map(([date, b]) => ({
+      date,
+      costs: b.costs,
+      total: b.total,
+      cache_read_cost: b.cache_read_cost,
+      cache_write_cost: b.cache_write_cost,
+      cache_savings: b.cache_savings,
+    }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
   const hourly: HourlyCost[] = [...hourlyMap.entries()]
-    .map(([hour, { costs, total }]) => ({ hour, costs, total }))
+    .map(([hour, b]) => ({
+      hour,
+      costs: b.costs,
+      total: b.total,
+      cache_read_cost: b.cache_read_cost,
+      cache_write_cost: b.cache_write_cost,
+      cache_savings: b.cache_savings,
+    }))
     .sort((a, b) => a.hour.localeCompare(b.hour));
 
   // ── Cost by project ────────────────────────────────────────────────────────

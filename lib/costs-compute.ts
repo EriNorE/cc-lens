@@ -24,3 +24,22 @@ export function sumDailyCost(days: DailyCost[]): number {
 export function sumHourlyCost(hours: HourlyCost[]): number {
   return hours.reduce((sum, h) => sum + h.total, 0);
 }
+
+/** Aggregate cache cost breakdown and savings from daily or hourly entries */
+export function sumCacheBreakdown(
+  entries: Array<{
+    cache_read_cost: number;
+    cache_write_cost: number;
+    cache_savings: number;
+  }>,
+): { cacheReadCost: number; cacheWriteCost: number; cacheSavings: number } {
+  let cacheReadCost = 0;
+  let cacheWriteCost = 0;
+  let cacheSavings = 0;
+  for (const e of entries) {
+    cacheReadCost += e.cache_read_cost;
+    cacheWriteCost += e.cache_write_cost;
+    cacheSavings += e.cache_savings;
+  }
+  return { cacheReadCost, cacheWriteCost, cacheSavings };
+}
