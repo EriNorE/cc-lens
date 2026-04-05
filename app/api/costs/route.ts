@@ -12,24 +12,35 @@ import type {
   DailyCost,
   HourlyCost,
   ProjectCost,
+  StatsCache,
+  SessionMeta,
 } from "@/types/claude";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const [stats, sessions] = await Promise.all([
-    readStatsCache(),
-    getSessions(),
-  ]);
+type CostBucket = {
+  costs: Record<string, number>;
+  total: number;
+  cache_read_cost: number;
+  cache_write_cost: number;
+  cache_savings: number;
+};
 
-  if (!stats) {
-    return NextResponse.json(
-      { error: "Stats cache unavailable" },
-      { status: 404 },
-    );
-  }
+function emptyBucket(): CostBucket {
+  return {
+    costs: {},
+    total: 0,
+    cache_read_cost: 0,
+    cache_write_cost: 0,
+    cache_savings: 0,
+  };
+}
 
-  // ── Per-model breakdown (from stats-cache — authoritative totals) ─────────
+function buildModelBreakdown(stats: StatsCache): {
+  models: ModelCostBreakdown[];
+  totalCost: number;
+  totalSavings: number;
+} {
   let totalCost = 0;
   let totalSavings = 0;
   const models: ModelCostBreakdown[] = Object.entries(stats.modelUsage ?? {})
@@ -50,23 +61,19 @@ export async function GET() {
       };
     })
     .sort((a, b) => b.estimated_cost - a.estimated_cost);
+  return { models, totalCost, totalSavings };
+}
 
-  // ── Daily + Hourly cost — ALL from JSONL sessions (single source of truth) ─
-  // This ensures 1d/7d/30d/90d/All use the same calculation method
-  type CostBucket = {
-    costs: Record<string, number>;
-    total: number;
-    cache_read_cost: number;
-    cache_write_cost: number;
-    cache_savings: number;
-  };
+function buildDailyHourlyCosts(sessions: SessionMeta[]): {
+  daily: DailyCost[];
+  hourly: HourlyCost[];
+  totalCacheReadCost: number;
+  totalCacheWriteCost: number;
+} {
   const dailyMap = new Map<string, CostBucket>();
+  const hourlyMap = new Map<string, CostBucket>();
   const now = new Date();
   const cutoff24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const hourlyMap = new Map<string, CostBucket>();
-
-  // Track all-time cache cost totals.
-  // NOTE: Summed from JSONL sessions, not stats-cache — may differ when stale.
   let totalCacheReadCost = 0;
   let totalCacheWriteCost = 0;
 
@@ -90,14 +97,6 @@ export async function GET() {
     totalCacheReadCost += cacheReadCost;
     totalCacheWriteCost += cacheWriteCost;
 
-    // Daily aggregation
-    const emptyBucket = (): CostBucket => ({
-      costs: {},
-      total: 0,
-      cache_read_cost: 0,
-      cache_write_cost: 0,
-      cache_savings: 0,
-    });
     const dayEntry = dailyMap.get(date) ?? emptyBucket();
     dayEntry.total += cost;
     dayEntry.cache_read_cost += cacheReadCost;
@@ -106,7 +105,6 @@ export async function GET() {
     dayEntry.costs[sessionModel] = (dayEntry.costs[sessionModel] ?? 0) + cost;
     dailyMap.set(date, dayEntry);
 
-    // Hourly aggregation (last 24h only)
     const sessionTime = new Date(ts);
     if (sessionTime >= cutoff24h) {
       const mm = String(sessionTime.getMonth() + 1).padStart(2, "0");
@@ -146,7 +144,10 @@ export async function GET() {
     }))
     .sort((a, b) => a.hour.localeCompare(b.hour));
 
-  // ── Cost by project ────────────────────────────────────────────────────────
+  return { daily, hourly, totalCacheReadCost, totalCacheWriteCost };
+}
+
+function buildProjectCosts(sessions: SessionMeta[]): ProjectCost[] {
   const projectMap = new Map<
     string,
     { cost: number; input: number; output: number }
@@ -168,7 +169,7 @@ export async function GET() {
     });
   }
 
-  const by_project: ProjectCost[] = [...projectMap.entries()]
+  return [...projectMap.entries()]
     .map(([slug, data]) => ({
       slug,
       display_name: projectDisplayName(slug),
@@ -178,6 +179,25 @@ export async function GET() {
     }))
     .sort((a, b) => b.estimated_cost - a.estimated_cost)
     .slice(0, 20);
+}
+
+export async function GET() {
+  const [stats, sessions] = await Promise.all([
+    readStatsCache(),
+    getSessions(),
+  ]);
+
+  if (!stats) {
+    return NextResponse.json(
+      { error: "Stats cache unavailable" },
+      { status: 404 },
+    );
+  }
+
+  const { models, totalCost, totalSavings } = buildModelBreakdown(stats);
+  const { daily, hourly, totalCacheReadCost, totalCacheWriteCost } =
+    buildDailyHourlyCosts(sessions);
+  const by_project = buildProjectCosts(sessions);
 
   return NextResponse.json({
     total_cost: totalCost,
