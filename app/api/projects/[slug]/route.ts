@@ -20,6 +20,9 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
+  if (/[/\\]/.test(slug) || /\.\./.test(slug)) {
+    return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
+  }
   const projectPath = await resolveProjectPath(slug);
   const allSessions = await getSessions();
   let sessions = allSessions.filter((s) => s.project_path === projectPath);
