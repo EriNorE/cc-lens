@@ -8,6 +8,7 @@ export {
   resolveProjectPath,
   findSessionSlug,
   findSessionJSONL,
+  isValidSlug,
 } from "./projects";
 export {
   deriveSessionMetaFromJSONL,

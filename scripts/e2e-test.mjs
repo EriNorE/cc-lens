@@ -58,10 +58,10 @@ try {
   console.log("1. Overview Page");
   const overview = await context.newPage();
   await overview.goto(BASE, { waitUntil: "load", timeout: 15000 });
-  // Wait for actual data instead of fixed timeout (cold start can take >3s)
+  // Wait for actual data — 30s accommodates Turbopack cold compile + SSR + SWR fetch
   await overview.waitForFunction(
     () => document.body.textContent.includes("conversations"),
-    { timeout: 15000 },
+    { timeout: 30000 },
   );
 
   await test("page loads with title", async () => {

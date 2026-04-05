@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
           key: "Content-Security-Policy",
           // unsafe-inline + unsafe-eval needed for Next.js dev mode + Recharts
           value:
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:",
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; frame-ancestors 'none'",
         },
       ],
     },
