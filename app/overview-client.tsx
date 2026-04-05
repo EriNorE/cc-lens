@@ -31,6 +31,7 @@ interface ApiResponse {
     sessionsThisWeek: number;
     storageBytes: number;
     sessionCount: number;
+    firstSessionDate: string;
   };
 }
 
@@ -97,9 +98,7 @@ function ChartCard({
 }
 
 export function OverviewClient() {
-  const [dateFrom, setDateFrom] = useState(() =>
-    format(subDays(new Date(), 7), "MM/dd/yyyy"),
-  );
+  const [dateFromOverride, setDateFrom] = useState<string | null>(null);
   const [dateTo, setDateTo] = useState(() => format(new Date(), "MM/dd/yyyy"));
 
   const { data, error, isLoading } = useSWR<ApiResponse>(
@@ -116,6 +115,15 @@ export function OverviewClient() {
       refreshInterval: 5_000,
     },
   );
+
+  // Use earliest session date from API when available, else 7-day default
+  const dateFrom = useMemo(() => {
+    if (dateFromOverride) return dateFromOverride;
+    if (data?.computed?.firstSessionDate) {
+      return format(new Date(data.computed.firstSessionDate), "MM/dd/yyyy");
+    }
+    return format(subDays(new Date(), 7), "MM/dd/yyyy");
+  }, [dateFromOverride, data?.computed?.firstSessionDate]);
   const { data: projectsData } = useSWR<{ projects: ProjectSummary[] }>(
     "/api/projects",
     fetcher,
