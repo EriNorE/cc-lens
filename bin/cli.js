@@ -126,31 +126,38 @@ async function main() {
     "bin",
     "next",
   );
+  // Check if node_modules already satisfies deps (skip npm install if so)
+  const lockFile = path.join(CACHE_DIR, "node_modules", ".package-lock.json");
+  const hasModules = fs.existsSync(lockFile);
   const needsSetup = cachedVersion !== pkg.version || !fs.existsSync(nextCli);
+  const needsInstall = needsSetup && !hasModules;
 
   if (needsSetup) {
-    console.log(`  ${DIM}Setting up (first run, may take a minute)…${R}\n`);
-
     // Copy all source files into ~/.cc-lens/ so Next.js runs entirely within
     // that directory — no symlinks, no Turbopack root violations.
     syncSource(pkg);
 
-    await new Promise((resolve, reject) => {
-      const install = spawn(
-        "npm",
-        ["install", "--prefer-offline", "--no-package-lock"],
-        {
-          cwd: CACHE_DIR,
-          stdio: "inherit",
-          shell: true,
-        },
-      );
-      install.on("exit", (code) =>
-        code === 0
-          ? resolve()
-          : reject(new Error(`npm install failed (exit ${code})`)),
-      );
-    });
+    if (needsInstall) {
+      console.log(`  ${DIM}Setting up (first run, may take a minute)…${R}\n`);
+      await new Promise((resolve, reject) => {
+        const install = spawn(
+          "npm",
+          ["install", "--prefer-offline", "--no-package-lock"],
+          {
+            cwd: CACHE_DIR,
+            stdio: "inherit",
+            shell: true,
+          },
+        );
+        install.on("exit", (code) =>
+          code === 0
+            ? resolve()
+            : reject(new Error(`npm install failed (exit ${code})`)),
+        );
+      });
+    } else {
+      console.log(`  ${DIM}Updating source files…${R}\n`);
+    }
 
     fs.writeFileSync(versionFile, pkg.version);
   }

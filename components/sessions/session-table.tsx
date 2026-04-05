@@ -1,92 +1,114 @@
-'use client'
+"use client";
 
-import { useState, useMemo } from 'react'
-import Link from 'next/link'
-import { SessionBadges } from './session-badges'
-import { formatCost, formatTokens, formatDuration, formatDate, projectDisplayName } from '@/lib/decode'
-import type { SessionWithFacet } from '@/types/claude'
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import { SessionBadges } from "./session-badges";
+import {
+  formatCost,
+  formatTokens,
+  formatDuration,
+  formatDate,
+  projectDisplayName,
+} from "@/lib/decode";
+import type { SessionWithFacet } from "@/types/claude";
 
-const PAGE_SIZE = 25
+const PAGE_SIZE = 25;
 
-type SortKey = 'start_time' | 'duration_minutes' | 'total_messages' | 'estimated_cost' | 'tool_calls'
-type SortDir = 'asc' | 'desc'
+type SortKey =
+  | "start_time"
+  | "duration_minutes"
+  | "total_messages"
+  | "estimated_cost"
+  | "tool_calls";
+type SortDir = "asc" | "desc";
 
 interface Props {
-  sessions: SessionWithFacet[]
+  sessions: SessionWithFacet[];
 }
 
 function SortHeader({
-  label, k, sortKey, sortDir, onSort,
+  label,
+  k,
+  sortKey,
+  sortDir,
+  onSort,
 }: {
-  label: string
-  k: SortKey
-  sortKey: SortKey
-  sortDir: SortDir
-  onSort: (k: SortKey) => void
+  label: string;
+  k: SortKey;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (k: SortKey) => void;
 }) {
-  const active = sortKey === k
+  const active = sortKey === k;
   return (
     <button
       onClick={() => onSort(k)}
-      className={`text-left text-[12px] font-bold uppercase tracking-wider whitespace-nowrap hover:text-foreground transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}
+      aria-sort={
+        active ? (sortDir === "desc" ? "descending" : "ascending") : undefined
+      }
+      className={`text-left text-[12px] font-bold uppercase tracking-wider whitespace-nowrap hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
     >
-      {label} {active ? (sortDir === 'desc' ? '↓' : '↑') : ''}
+      {label} {active ? (sortDir === "desc" ? "↓" : "↑") : ""}
     </button>
-  )
+  );
 }
 
 export function SessionTable({ sessions }: Props) {
-  const [sortKey, setSortKey] = useState<SortKey>('start_time')
-  const [sortDir, setSortDir] = useState<SortDir>('desc')
-  const [page, setPage] = useState(1)
-  const [filterCompacted, setFilterCompacted] = useState(false)
-  const [filterAgent, setFilterAgent] = useState(false)
-  const [filterMcp, setFilterMcp] = useState(false)
-  const [search, setSearch] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>("start_time");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [page, setPage] = useState(1);
+  const [filterCompacted, setFilterCompacted] = useState(false);
+  const [filterAgent, setFilterAgent] = useState(false);
+  const [filterMcp, setFilterMcp] = useState(false);
+  const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
-    let s = sessions
-    if (filterCompacted) s = s.filter(x => x.has_compaction)
-    if (filterAgent)     s = s.filter(x => x.uses_task_agent)
-    if (filterMcp)       s = s.filter(x => x.uses_mcp)
+    let s = sessions;
+    if (filterCompacted) s = s.filter((x) => x.has_compaction);
+    if (filterAgent) s = s.filter((x) => x.uses_task_agent);
+    if (filterMcp) s = s.filter((x) => x.uses_mcp);
     if (search) {
-      const q = search.toLowerCase()
-      s = s.filter(x =>
-        x.project_path?.toLowerCase().includes(q) ||
-        x.first_prompt?.toLowerCase().includes(q) ||
-        x.slug?.toLowerCase().includes(q)
-      )
+      const q = search.toLowerCase();
+      s = s.filter(
+        (x) =>
+          x.project_path?.toLowerCase().includes(q) ||
+          x.first_prompt?.toLowerCase().includes(q) ||
+          x.slug?.toLowerCase().includes(q),
+      );
     }
-    return s
-  }, [sessions, filterCompacted, filterAgent, filterMcp, search])
+    return s;
+  }, [sessions, filterCompacted, filterAgent, filterMcp, search]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
-      let av: number, bv: number
-      if (sortKey === 'start_time') {
-        av = new Date(a.start_time).getTime()
-        bv = new Date(b.start_time).getTime()
-      } else if (sortKey === 'total_messages') {
-        av = (a.user_message_count ?? 0) + (a.assistant_message_count ?? 0)
-        bv = (b.user_message_count ?? 0) + (b.assistant_message_count ?? 0)
-      } else if (sortKey === 'tool_calls') {
-        av = Object.values(a.tool_counts ?? {}).reduce((s, c) => s + c, 0)
-        bv = Object.values(b.tool_counts ?? {}).reduce((s, c) => s + c, 0)
+      let av: number, bv: number;
+      if (sortKey === "start_time") {
+        av = new Date(a.start_time).getTime();
+        bv = new Date(b.start_time).getTime();
+      } else if (sortKey === "total_messages") {
+        av = (a.user_message_count ?? 0) + (a.assistant_message_count ?? 0);
+        bv = (b.user_message_count ?? 0) + (b.assistant_message_count ?? 0);
+      } else if (sortKey === "tool_calls") {
+        av = Object.values(a.tool_counts ?? {}).reduce((s, c) => s + c, 0);
+        bv = Object.values(b.tool_counts ?? {}).reduce((s, c) => s + c, 0);
       } else {
-        av = (a[sortKey] as number) ?? 0
-        bv = (b[sortKey] as number) ?? 0
+        av = (a[sortKey] as number) ?? 0;
+        bv = (b[sortKey] as number) ?? 0;
       }
-      return sortDir === 'desc' ? bv - av : av - bv
-    })
-  }, [filtered, sortKey, sortDir])
+      return sortDir === "desc" ? bv - av : av - bv;
+    });
+  }, [filtered, sortKey, sortDir]);
 
-  const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
-  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   function toggleSort(key: SortKey) {
-    if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc')
-    else { setSortKey(key); setSortDir('desc') }
-    setPage(1)
+    if (sortKey === key) setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+    else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+    setPage(1);
   }
 
   return (
@@ -97,14 +119,20 @@ export function SessionTable({ sessions }: Props) {
           type="text"
           placeholder="Search project or prompt..."
           value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1) }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="bg-muted border border-border rounded px-2 py-1 text-[13px] text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary/50 w-52"
         />
         <label className="flex items-center gap-1.5 text-[13px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
           <input
             type="checkbox"
             checked={filterCompacted}
-            onChange={e => { setFilterCompacted(e.target.checked); setPage(1) }}
+            onChange={(e) => {
+              setFilterCompacted(e.target.checked);
+              setPage(1);
+            }}
             className="accent-amber-500"
           />
           ⚡ compacted
@@ -113,7 +141,10 @@ export function SessionTable({ sessions }: Props) {
           <input
             type="checkbox"
             checked={filterAgent}
-            onChange={e => { setFilterAgent(e.target.checked); setPage(1) }}
+            onChange={(e) => {
+              setFilterAgent(e.target.checked);
+              setPage(1);
+            }}
             className="accent-purple-500"
           />
           🤖 agent
@@ -122,7 +153,10 @@ export function SessionTable({ sessions }: Props) {
           <input
             type="checkbox"
             checked={filterMcp}
-            onChange={e => { setFilterMcp(e.target.checked); setPage(1) }}
+            onChange={(e) => {
+              setFilterMcp(e.target.checked);
+              setPage(1);
+            }}
             className="accent-blue-500"
           />
           🔌 mcp
@@ -138,26 +172,80 @@ export function SessionTable({ sessions }: Props) {
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-border bg-muted">
-                <th className="px-3 py-2 text-left"><SortHeader label="Date" k="start_time" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /></th>
-                <th className="px-3 py-2 text-left"><span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Project</span></th>
-                <th className="px-3 py-2 text-right"><SortHeader label="Dur" k="duration_minutes" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /></th>
-                <th className="px-3 py-2 text-right"><SortHeader label="Msgs" k="total_messages" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /></th>
-                <th className="px-3 py-2 text-right"><SortHeader label="Tools" k="tool_calls" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /></th>
-                <th className="px-3 py-2 text-right"><SortHeader label="Cost" k="estimated_cost" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} /></th>
-                <th className="px-3 py-2 text-left"><span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Flags</span></th>
+                <th className="px-3 py-2 text-left">
+                  <SortHeader
+                    label="Date"
+                    k="start_time"
+                    sortKey={sortKey}
+                    sortDir={sortDir}
+                    onSort={toggleSort}
+                  />
+                </th>
+                <th className="px-3 py-2 text-left">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Project
+                  </span>
+                </th>
+                <th className="px-3 py-2 text-right">
+                  <SortHeader
+                    label="Dur"
+                    k="duration_minutes"
+                    sortKey={sortKey}
+                    sortDir={sortDir}
+                    onSort={toggleSort}
+                  />
+                </th>
+                <th className="px-3 py-2 text-right">
+                  <SortHeader
+                    label="Msgs"
+                    k="total_messages"
+                    sortKey={sortKey}
+                    sortDir={sortDir}
+                    onSort={toggleSort}
+                  />
+                </th>
+                <th className="px-3 py-2 text-right">
+                  <SortHeader
+                    label="Tools"
+                    k="tool_calls"
+                    sortKey={sortKey}
+                    sortDir={sortDir}
+                    onSort={toggleSort}
+                  />
+                </th>
+                <th className="px-3 py-2 text-right">
+                  <SortHeader
+                    label="Cost"
+                    k="estimated_cost"
+                    sortKey={sortKey}
+                    sortDir={sortDir}
+                    onSort={toggleSort}
+                  />
+                </th>
+                <th className="px-3 py-2 text-left">
+                  <span className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Flags
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>
               {paginated.map((s, i) => {
-                const totalMsgs = (s.user_message_count ?? 0) + (s.assistant_message_count ?? 0)
-                const totalTools = Object.values(s.tool_counts ?? {}).reduce((sum, c) => sum + c, 0)
-                const totalTokens = (s.input_tokens ?? 0) + (s.output_tokens ?? 0)
-                const projectName = projectDisplayName(s.project_path ?? '')
+                const totalMsgs =
+                  (s.user_message_count ?? 0) +
+                  (s.assistant_message_count ?? 0);
+                const totalTools = Object.values(s.tool_counts ?? {}).reduce(
+                  (sum, c) => sum + c,
+                  0,
+                );
+                const totalTokens =
+                  (s.input_tokens ?? 0) + (s.output_tokens ?? 0);
+                const projectName = projectDisplayName(s.project_path ?? "");
 
                 return (
                   <tr
                     key={s.session_id}
-                    className={`border-b border-border/50 hover:bg-muted transition-colors ${i % 2 === 0 ? '' : 'bg-muted/30'}`}
+                    className={`border-b border-border/50 hover:bg-muted transition-colors ${i % 2 === 0 ? "" : "bg-muted/30"}`}
                   >
                     <td className="px-3 py-2 font-mono text-muted-foreground whitespace-nowrap">
                       {formatDate(s.start_time)}
@@ -166,7 +254,7 @@ export function SessionTable({ sessions }: Props) {
                       <Link
                         href={`/sessions/${s.session_id}`}
                         className="text-foreground hover:text-primary transition-colors font-medium truncate block"
-                        title={s.project_path ?? ''}
+                        title={s.project_path ?? ""}
                       >
                         {projectName}
                       </Link>
@@ -199,11 +287,14 @@ export function SessionTable({ sessions }: Props) {
                       />
                     </td>
                   </tr>
-                )
+                );
               })}
               {paginated.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground/50 text-[13px]">
+                  <td
+                    colSpan={7}
+                    className="px-3 py-8 text-center text-muted-foreground/50 text-[13px]"
+                  >
                     No sessions match filters
                   </td>
                 </tr>
@@ -221,29 +312,35 @@ export function SessionTable({ sessions }: Props) {
           </span>
           <div className="flex gap-1">
             <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
               className="px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               ←
             </button>
             {(() => {
-              const maxVisible = Math.min(5, totalPages)
-              const startPage = Math.max(1, Math.min(page - 2, totalPages - maxVisible + 1))
-              const numPages = Math.min(maxVisible, totalPages - startPage + 1)
-              const pages = Array.from({ length: numPages }, (_, i) => startPage + i)
+              const maxVisible = Math.min(5, totalPages);
+              const startPage = Math.max(
+                1,
+                Math.min(page - 2, totalPages - maxVisible + 1),
+              );
+              const numPages = Math.min(maxVisible, totalPages - startPage + 1);
+              const pages = Array.from(
+                { length: numPages },
+                (_, i) => startPage + i,
+              );
               return pages.map((p) => (
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`px-2 py-1 rounded border transition-colors ${p === page ? 'border-primary text-primary' : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'}`}
+                  className={`px-2 py-1 rounded border transition-colors ${p === page ? "border-primary text-primary" : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"}`}
                 >
                   {p}
                 </button>
-              ))
+              ));
             })()}
             <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
@@ -253,5 +350,5 @@ export function SessionTable({ sessions }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }
