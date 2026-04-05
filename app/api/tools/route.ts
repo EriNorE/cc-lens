@@ -6,7 +6,6 @@ import type { ToolsAnalytics, ToolSummary, McpServerSummary, VersionRecord } fro
 
 export const dynamic = 'force-dynamic'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyLine = Record<string, any>
 
 export async function GET() {

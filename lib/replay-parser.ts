@@ -9,7 +9,6 @@ import type {
 import { estimateCostFromUsage } from '@/lib/pricing'
 import { readJSONLLines } from '@/lib/claude-reader'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyLine = Record<string, any>
 
 export async function parseSessionReplay(
