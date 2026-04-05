@@ -3,6 +3,11 @@ import path from "path";
 import { claudePath } from "./paths";
 import { slugToPath } from "@/lib/decode";
 
+/** Reject slugs with path traversal characters */
+export function isValidSlug(slug: string): boolean {
+  return !/[/\\]/.test(slug) && !/\.\./.test(slug);
+}
+
 export async function listProjectSlugs(): Promise<string[]> {
   try {
     const entries = await fs.readdir(claudePath("projects"), {
@@ -15,6 +20,7 @@ export async function listProjectSlugs(): Promise<string[]> {
 }
 
 export async function listProjectJSONLFiles(slug: string): Promise<string[]> {
+  if (!isValidSlug(slug)) return [];
   try {
     const dir = claudePath("projects", slug);
     const files = await fs.readdir(dir);
@@ -48,6 +54,7 @@ export async function readJSONLLines(
 
 /** Resolve the actual filesystem path for a project slug */
 export async function resolveProjectPath(slug: string): Promise<string> {
+  if (!isValidSlug(slug)) return slugToPath(slug);
   const dir = claudePath("projects", slug);
   try {
     const files = await fs.readdir(dir);
