@@ -3,10 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { TopBar } from "@/components/layout/top-bar";
-import {
-  CostOverTimeChart,
-  type CostWindow,
-} from "@/components/costs/cost-over-time-chart";
+import { CostOverTimeChart } from "@/components/costs/cost-over-time-chart";
+import type { CostWindow } from "@/lib/costs-compute";
 import { CostByProjectChart } from "@/components/costs/cost-by-project-chart";
 import { ModelTokenTable } from "@/components/costs/model-token-table";
 import { CacheEfficiencyPanel } from "@/components/costs/cache-efficiency-panel";
