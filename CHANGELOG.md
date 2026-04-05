@@ -2,6 +2,37 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.4.1] — 2026-04-06
+
+### Fixed
+
+- Session count oscillation (1979/389) — getSessions() returns larger of JSONL/meta sets (#62)
+- Overview "From" date hardcoded to 7 days — now uses earliest session date (#55)
+- Cache token percentage showed 38,392% — separate denominators for IO vs cache (#56)
+- `firstSessionDate=""` → Invalid Date guard in overview (#62)
+
+### Security
+
+- `resolveProjectPath` validates cwd from JSONL — must be absolute, no `..` (#62)
+- Session `[id]` and replay routes reject path traversal (#62)
+- Content-Security-Policy header added (#62)
+- Project slug path traversal validation — `isValidSlug()` helper (#53)
+- Security headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy (#53)
+- `readAllSessionMeta` race condition fixed (#53)
+- `console.warn` guarded with NODE_ENV !== production (#53)
+- npm audit: 7 vulnerabilities → 0 (#53)
+
+### Added
+
+- 32 new tests: integration tests for readers + error path tests + middleware tests
+- Coverage now enforces `lib/readers/projects.ts` (83%) and `memory.ts` (97%)
+
+### Changed
+
+- E2E: `waitForTimeout(3000)` → `waitForFunction` with data-loaded signal (#63)
+- `security-paths.test.ts` imports `isValidSlug` from production code (#62)
+- Coverage exclude narrowed from blanket `lib/readers/**` to specific untested files (#63)
+
 ## [0.4.0] — 2026-04-05
 
 ### Added
