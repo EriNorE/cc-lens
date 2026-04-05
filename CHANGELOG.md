@@ -2,6 +2,34 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.4.0] — 2026-04-05
+
+### Added
+
+- Per-window cache breakdown — cache savings shown for all time windows (1d/7d/30d/90d/All)
+- Unit tests for `stats-compute.ts` and `costs-compute.ts` (27 new tests, 77 total)
+- Coverage threshold enforcement in CI (`@vitest/coverage-v8`)
+- Health endpoint reads version from `package.json` (no more hardcoded string)
+
+### Fixed
+
+- CLI ETARGET on fresh install — copy `package-lock.json` to `~/.cc-lens/` (#40)
+- `CostWindow` type duplication removed — single canonical source (#41)
+- CI no longer runs tests twice — merged into single step (#44)
+
+### Security
+
+- Middleware: two-layer defense (CC_LENS_HOST env check + Host header) (#47)
+- Atomic cache writes via tmp + rename to prevent corruption (#47)
+- API input validation: parseInt NaN guard, Invalid Date guard (#47)
+- Sessions reader: eliminated shared array mutation race condition (#47)
+
+### Changed
+
+- Coverage thresholds restored to 80% on pure compute modules (#46)
+- `costs/route.ts` GET() refactored into 3 sub-functions (#48)
+- DOMAIN.md pricing table updated to v0.4.0 with all models (#48)
+
 ## [0.3.2] — 2026-04-05
 
 ### Added

@@ -74,13 +74,13 @@ Pre-computed by Claude Code, stored at `~/.claude/stats-cache.json`. Read-only f
 - When duplicate found: keep the one with the latest `start_time`
 - Agent sessions (`agent-*`) commonly appear in multiple projects
 
-## Pricing Table (as of v0.3.2)
+## Pricing Table (as of v0.4.0)
 
-| Model             | Input $/M | Output $/M | Cache Write $/M | Cache Read $/M |
-| ----------------- | --------- | ---------- | --------------- | -------------- |
-| claude-opus-4-6   | $15.00    | $75.00     | $18.75          | $1.50          |
-| claude-opus-4-5   | $15.00    | $75.00     | $18.75          | $1.50          |
-| claude-sonnet-4-6 | $3.00     | $15.00     | $3.75           | $0.30          |
-| claude-haiku-4-5  | $0.80     | $4.00      | $1.00           | $0.08          |
+| Model                    | Input $/M | Output $/M | Cache Write $/M | Cache Read $/M |
+| ------------------------ | --------- | ---------- | --------------- | -------------- |
+| claude-opus-4-6          | $15.00    | $75.00     | $18.75          | $1.50          |
+| claude-opus-4-5-20251101 | $15.00    | $75.00     | $18.75          | $1.50          |
+| claude-sonnet-4-6        | $3.00     | $15.00     | $3.75           | $0.30          |
+| claude-haiku-4-5         | $0.80     | $4.00      | $1.00           | $0.08          |
 
 Fuzzy matching: model strings with date suffixes (e.g., `claude-haiku-4-5-20251001`) match their prefix.
