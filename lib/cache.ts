@@ -30,7 +30,9 @@ export async function readCache(): Promise<CacheData> {
 
 export async function writeCache(data: CacheData): Promise<void> {
   await fs.mkdir(CACHE_DIR, { recursive: true });
-  await fs.writeFile(CACHE_FILE, JSON.stringify(data));
+  const tmp = CACHE_FILE + ".tmp";
+  await fs.writeFile(tmp, JSON.stringify(data));
+  await fs.rename(tmp, CACHE_FILE);
 }
 
 export function getCachedEntry(
@@ -85,7 +87,9 @@ export async function writeProjectPathCache(
   data: ProjectPathCache,
 ): Promise<void> {
   await fs.mkdir(CACHE_DIR, { recursive: true });
-  await fs.writeFile(PROJECT_PATH_FILE, JSON.stringify(data));
+  const tmp = PROJECT_PATH_FILE + ".tmp";
+  await fs.writeFile(tmp, JSON.stringify(data));
+  await fs.rename(tmp, PROJECT_PATH_FILE);
 }
 
 export function getCachedProjectPath(
