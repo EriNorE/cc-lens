@@ -50,6 +50,7 @@ export interface SessionMeta {
   project_path: string;
   start_time: string;
   duration_minutes: number;
+  model: string;
   user_message_count: number;
   assistant_message_count: number;
   tool_counts: Record<string, number>;

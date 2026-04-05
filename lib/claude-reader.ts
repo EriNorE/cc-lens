@@ -174,6 +174,7 @@ export async function deriveSessionMetaFromJSONL(
   let cacheRead = 0;
   let cacheWrite = 0;
   let firstPrompt = "";
+  const modelCounts: Record<string, number> = {};
   let hasTaskAgent = false;
   let hasMcp = false;
   let hasWebSearch = false;
@@ -220,9 +221,16 @@ export async function deriveSessionMetaFromJSONL(
           assistantCount++;
           const msg = (
             obj as {
-              message?: { usage?: Record<string, number>; content?: unknown[] };
+              message?: {
+                model?: string;
+                usage?: Record<string, number>;
+                content?: unknown[];
+              };
             }
           ).message;
+          if (msg?.model) {
+            modelCounts[msg.model] = (modelCounts[msg.model] ?? 0) + 1;
+          }
           if (msg?.usage) {
             inputTokens += msg.usage.input_tokens ?? 0;
             outputTokens += msg.usage.output_tokens ?? 0;
@@ -262,11 +270,17 @@ export async function deriveSessionMetaFromJSONL(
   const end = lastTime ? new Date(lastTime).getTime() : start;
   const durationMinutes = (end - start) / 60_000;
 
+  // Pick the most-used model in this session (fallback to opus)
+  const model =
+    Object.entries(modelCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ??
+    "claude-opus-4-6";
+
   return {
     session_id: sessionId,
     project_path: projectPath,
     start_time: startTime,
     duration_minutes: durationMinutes,
+    model,
     user_message_count: userCount,
     assistant_message_count: assistantCount,
     tool_counts: toolCounts,

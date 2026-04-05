@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { readStatsCache, getSessions } from "@/lib/claude-reader";
 import {
   estimateTotalCostFromModel,
-  estimateCostFromUsage,
   cacheEfficiency,
   getPricing,
 } from "@/lib/pricing";
@@ -71,18 +70,19 @@ export async function GET() {
     const date = ts.slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
 
-    // Use simple cost model: input + output tokens only (no cache tokens)
-    // This matches what the user actually "spent" in API-equivalent terms
-    // Cache tokens inflate the number and confuse the per-day view
-    const p = getPricing("claude-opus-4-6");
+    // Use actual session model for pricing (not hardcoded Opus)
+    const sessionModel = s.model ?? "claude-opus-4-6";
+    const p = getPricing(sessionModel);
     const cost =
-      (s.input_tokens ?? 0) * p.input + (s.output_tokens ?? 0) * p.output;
+      (s.input_tokens ?? 0) * p.input +
+      (s.output_tokens ?? 0) * p.output +
+      (s.cache_creation_input_tokens ?? 0) * p.cacheWrite +
+      (s.cache_read_input_tokens ?? 0) * p.cacheRead;
 
     // Daily aggregation
     const dayEntry = dailyMap.get(date) ?? { costs: {}, total: 0 };
     dayEntry.total += cost;
-    dayEntry.costs["claude-opus-4-6"] =
-      (dayEntry.costs["claude-opus-4-6"] ?? 0) + cost;
+    dayEntry.costs[sessionModel] = (dayEntry.costs[sessionModel] ?? 0) + cost;
     dailyMap.set(date, dayEntry);
 
     // Hourly aggregation (last 24h only)
@@ -94,8 +94,8 @@ export async function GET() {
       const hourLabel = `${mm}-${dd} ${hh}:00`;
       const hourEntry = hourlyMap.get(hourLabel) ?? { costs: {}, total: 0 };
       hourEntry.total += cost;
-      hourEntry.costs["claude-opus-4-6"] =
-        (hourEntry.costs["claude-opus-4-6"] ?? 0) + cost;
+      hourEntry.costs[sessionModel] =
+        (hourEntry.costs[sessionModel] ?? 0) + cost;
       hourlyMap.set(hourLabel, hourEntry);
     }
   }
@@ -116,9 +116,13 @@ export async function GET() {
   for (const s of sessions) {
     const slug = s.project_path ?? "";
     const existing = projectMap.get(slug) ?? { cost: 0, input: 0, output: 0 };
-    const p = getPricing("claude-opus-4-6");
+    const sessionModel = s.model ?? "claude-opus-4-6";
+    const p = getPricing(sessionModel);
     const cost =
-      (s.input_tokens ?? 0) * p.input + (s.output_tokens ?? 0) * p.output;
+      (s.input_tokens ?? 0) * p.input +
+      (s.output_tokens ?? 0) * p.output +
+      (s.cache_creation_input_tokens ?? 0) * p.cacheWrite +
+      (s.cache_read_input_tokens ?? 0) * p.cacheRead;
     projectMap.set(slug, {
       cost: existing.cost + cost,
       input: existing.input + (s.input_tokens ?? 0),
