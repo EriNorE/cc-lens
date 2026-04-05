@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { isValidSlug } from "@/lib/readers/projects";
 
 describe("API input validation", () => {
   describe("history route — parseInt NaN guard", () => {
@@ -51,30 +52,21 @@ describe("API input validation", () => {
       expect(file.endsWith(".md")).toBe(false);
     });
 
-    it("rejects path traversal in slug", () => {
-      const slug = "../../../etc";
-      expect(/[/\\]/.test(slug) || /\.\./.test(slug)).toBe(true);
+    it("rejects path traversal in slug via isValidSlug", () => {
+      expect(isValidSlug("../../../etc")).toBe(false);
+      expect(isValidSlug("foo/bar")).toBe(false);
+      expect(isValidSlug("foo\\bar")).toBe(false);
+      expect(isValidSlug("..")).toBe(false);
+    });
+
+    it("accepts valid slug via isValidSlug", () => {
+      expect(isValidSlug("-Users-itarun-cc-lens")).toBe(true);
+      expect(isValidSlug("my-project")).toBe(true);
     });
 
     it("rejects path traversal in file", () => {
       const file = "../../passwd";
       expect(/[/\\]/.test(file) || /\.\./.test(file)).toBe(true);
-    });
-
-    it("accepts valid input", () => {
-      const slug = "-Users-itarun-cc-lens";
-      const file = "feedback_review.md";
-      const content = "some content";
-      const valid =
-        !!slug &&
-        !!file &&
-        typeof content === "string" &&
-        file.endsWith(".md") &&
-        !/[/\\]/.test(slug) &&
-        !/\.\./.test(slug) &&
-        !/[/\\]/.test(file) &&
-        !/\.\./.test(file);
-      expect(valid).toBe(true);
     });
   });
 });

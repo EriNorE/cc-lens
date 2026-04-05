@@ -64,7 +64,8 @@ export async function resolveProjectPath(slug: string): Promise<string> {
     const firstLine = raw.split(/\r?\n/).find(Boolean);
     if (firstLine) {
       const obj = JSON.parse(firstLine) as { cwd?: string };
-      if (obj.cwd) return obj.cwd;
+      if (obj.cwd && path.isAbsolute(obj.cwd) && !obj.cwd.includes(".."))
+        return obj.cwd;
     }
   } catch {
     // Fall through to slug-based path

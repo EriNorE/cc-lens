@@ -304,12 +304,13 @@ export async function readSessionMeta(
   }
 }
 
-/** Get sessions: prefers JSONL, falls back to usage-data/session-meta */
+/** Get sessions: returns the larger of JSONL-derived and session-meta sets.
+ *  Prevents oscillation when readSessionsFromProjectJSONL() transiently
+ *  returns [] due to fs errors (catch-all at line 261). */
 export async function getSessions(): Promise<SessionMeta[]> {
   const [jsonl, meta] = await Promise.all([
     readSessionsFromProjectJSONL(),
     readAllSessionMeta(),
   ]);
-  if (jsonl.length > 0) return jsonl;
-  return meta;
+  return jsonl.length >= meta.length ? jsonl : meta;
 }
