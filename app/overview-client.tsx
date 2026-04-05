@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import useSWR from "swr";
 import { BarChart3, PieChart } from "lucide-react";
 import { UsageOverTimeChart } from "@/components/overview/usage-over-time-chart";
@@ -31,6 +31,7 @@ interface ApiResponse {
     sessionsThisWeek: number;
     storageBytes: number;
     sessionCount: number;
+    firstSessionDate: string;
   };
 }
 
@@ -116,6 +117,15 @@ export function OverviewClient() {
       refreshInterval: 5_000,
     },
   );
+
+  // Once data loads, set From to earliest session date (one-time update)
+  useEffect(() => {
+    if (data?.computed?.firstSessionDate) {
+      setDateFrom(
+        format(new Date(data.computed.firstSessionDate), "MM/dd/yyyy"),
+      );
+    }
+  }, [data?.computed?.firstSessionDate]);
   const { data: projectsData } = useSWR<{ projects: ProjectSummary[] }>(
     "/api/projects",
     fetcher,
