@@ -47,7 +47,7 @@ export function Sidebar() {
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "collapsed") setCollapsed(true);
+    if (saved === "collapsed") setCollapsed(true); // eslint-disable-line react-hooks/set-state-in-effect -- hydration sync from localStorage
   }, []);
 
   function handleToggle() {

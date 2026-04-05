@@ -9,11 +9,11 @@ export function MainContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "collapsed") setCollapsed(true);
+    if (saved === "collapsed") setCollapsed(true); // eslint-disable-line react-hooks/set-state-in-effect -- hydration sync from localStorage
 
     function onToggle(e: Event) {
       const detail = (e as CustomEvent).detail;
-      setCollapsed(detail.collapsed);
+      setCollapsed(detail.collapsed); // eslint-disable-line react-hooks/set-state-in-effect -- event-driven update
     }
     window.addEventListener("sidebar-toggle", onToggle);
     return () => window.removeEventListener("sidebar-toggle", onToggle);
