@@ -58,8 +58,11 @@ try {
   console.log("1. Overview Page");
   const overview = await context.newPage();
   await overview.goto(BASE, { waitUntil: "load", timeout: 15000 });
-  // Wait for SWR data to load (hero stats appear after API fetch)
-  await overview.waitForTimeout(3000);
+  // Wait for actual data instead of fixed timeout (cold start can take >3s)
+  await overview.waitForFunction(
+    () => document.body.textContent.includes("conversations"),
+    { timeout: 15000 },
+  );
 
   await test("page loads with title", async () => {
     await overview.waitForSelector("h1", { timeout: 5000 });
