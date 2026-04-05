@@ -2,7 +2,7 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
-## [0.4.1] — 2026-04-06
+## [0.4.2] — 2026-04-06
 
 ### Fixed
 
