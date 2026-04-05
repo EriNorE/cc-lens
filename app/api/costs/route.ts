@@ -24,7 +24,7 @@ export async function GET() {
 
   if (!stats) {
     return NextResponse.json(
-      { error: "stats-cache.json not found" },
+      { error: "Stats cache unavailable" },
       { status: 404 },
     );
   }

@@ -33,7 +33,7 @@ export default function RootLayout({
           id="theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.classList.add(t);})()`,
+            __html: `(function(){var t=localStorage.getItem('theme');t=['light','dark'].indexOf(t)!==-1?t:'dark';document.documentElement.classList.add(t);})()`,
           }}
         />
       </head>
