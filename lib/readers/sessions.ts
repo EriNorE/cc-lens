@@ -216,17 +216,18 @@ export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
       }),
     );
 
-    const allFiles: { filePath: string; projectPath: string; slug: string }[] =
-      [];
-    await Promise.all(
+    const filesBySlug = await Promise.all(
       slugs.map(async (slug, i) => {
         const files = await listProjectJSONLFiles(slug);
-        for (const filePath of files) {
-          validPaths.add(filePath);
-          allFiles.push({ filePath, projectPath: projectPaths[i], slug });
-        }
+        return files.map((filePath) => ({
+          filePath,
+          projectPath: projectPaths[i],
+          slug,
+        }));
       }),
     );
+    const allFiles = filesBySlug.flat();
+    for (const f of allFiles) validPaths.add(f.filePath);
 
     const BATCH_SIZE = 50;
     const results: SessionMeta[] = [];
