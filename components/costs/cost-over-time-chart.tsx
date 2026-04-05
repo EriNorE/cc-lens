@@ -36,7 +36,7 @@ function shortModel(m: string): string {
   return m;
 }
 
-export type CostWindow = 1 | 7 | 30 | 90 | 365;
+import type { CostWindow } from "@/lib/costs-compute";
 
 interface Props {
   daily: DailyCost[];

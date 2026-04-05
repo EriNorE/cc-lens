@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
+import pkg from "../../../package.json";
 
 export const dynamic = "force-dynamic";
 
 const CLAUDE_DIR = path.join(os.homedir(), ".claude");
-const VERSION = "0.4.0";
 
 export async function GET() {
   let claudeDir = false;
@@ -19,7 +19,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: claudeDir ? "ok" : "degraded",
-    version: VERSION,
+    version: pkg.version,
     claudeDir,
   });
 }
