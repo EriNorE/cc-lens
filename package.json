@@ -42,7 +42,6 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:ci": "vitest run --reporter=verbose",
     "verify-data": "node scripts/verify-data.mjs",
     "prepare": "husky"
   },
