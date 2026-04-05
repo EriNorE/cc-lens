@@ -84,6 +84,27 @@ Localhost-only by design. `middleware.ts` rejects non-localhost requests on `/ap
 | `CC_LENS_HOST`           | `127.0.0.1`       | Bind address                        |
 | `CC_LENS_FALLBACK_MODEL` | `claude-opus-4-6` | Pricing fallback for unknown models |
 
+## Release Checklist
+
+```bash
+# 1. Verify everything passes
+npx tsc --noEmit && npm test && npx vitest run --coverage
+
+# 2. Bump version (updates package.json only — health endpoint reads it dynamically)
+npm version patch   # or minor/major
+
+# 3. Update CHANGELOG.md with new version section
+
+# 4. Commit, tag, push
+git add package.json package-lock.json CHANGELOG.md
+git commit -m "chore: release v$(node -p 'require(\"./package.json\").version')"
+git tag "v$(node -p 'require("./package.json").version')"
+git push && git push --tags
+
+# 5. Create GitHub release
+gh release create "v$(node -p 'require("./package.json").version')" --generate-notes
+```
+
 ## Testing
 
 - **Unit tests**: `__tests__/*.test.ts` — pricing formulas, decode utilities, JSONL parsing
