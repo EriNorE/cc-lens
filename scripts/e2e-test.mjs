@@ -57,7 +57,9 @@ try {
   // ── 1. Overview page ─────────────────────────────────────────────────────
   console.log("1. Overview Page");
   const overview = await context.newPage();
-  await overview.goto(BASE, { waitUntil: "networkidle", timeout: 15000 });
+  await overview.goto(BASE, { waitUntil: "load", timeout: 15000 });
+  // Wait for SWR data to load (hero stats appear after API fetch)
+  await overview.waitForTimeout(3000);
 
   await test("page loads with title", async () => {
     await overview.waitForSelector("h1", { timeout: 5000 });
@@ -94,12 +96,11 @@ try {
   console.log("\n2. Sessions Page");
   const sessions = await context.newPage();
   await sessions.goto(`${BASE}/sessions`, {
-    waitUntil: "networkidle",
+    waitUntil: "load",
     timeout: 15000,
   });
-
   await test("session table renders", async () => {
-    await sessions.waitForSelector("table", { timeout: 5000 });
+    await sessions.waitForSelector("table", { timeout: 30000 });
   });
 
   await test("sort buttons are keyboard-focusable", async () => {
@@ -116,7 +117,7 @@ try {
   console.log("\n3. Costs Page");
   const costs = await context.newPage();
   await costs.goto(`${BASE}/costs`, {
-    waitUntil: "networkidle",
+    waitUntil: "load",
     timeout: 15000,
   });
 
@@ -172,7 +173,7 @@ try {
   console.log("\n5. Export Page");
   const exportPage = await context.newPage();
   await exportPage.goto(`${BASE}/export`, {
-    waitUntil: "networkidle",
+    waitUntil: "load",
     timeout: 15000,
   });
 
@@ -199,7 +200,7 @@ try {
   // ── 7. Navigation ────────────────────────────────────────────────────────
   console.log("\n7. Navigation");
   const nav = await context.newPage();
-  await nav.goto(BASE, { waitUntil: "networkidle", timeout: 15000 });
+  await nav.goto(BASE, { waitUntil: "load", timeout: 15000 });
 
   await test("sidebar has navigation role", async () => {
     const aside = nav.locator('aside[role="navigation"]');

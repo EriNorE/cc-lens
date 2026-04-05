@@ -21,10 +21,15 @@ Zero cloud. Zero telemetry. Your data never leaves your machine.
 ## Quick Start
 
 ```bash
-npx cc-lens
+git clone https://github.com/pitimon/cc-lens.git
+cd cc-lens
+npm install
+node bin/cli.js
 ```
 
-The CLI starts a local server on port `33033`, and opens the dashboard in your browser. No configuration needed.
+The CLI starts a local server on port `33033` and opens the dashboard in your browser.
+
+> **Note:** `npx cc-lens` installs the [upstream package](https://www.npmjs.com/package/cc-lens), not this fork. Use the clone method above to get the fork improvements.
 
 ## Fork Improvements
 
