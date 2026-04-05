@@ -1,6 +1,6 @@
 {
   "name": "cc-lens",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Claude Code Lens — visualize your usage, costs, and sessions from ~/.claude/",
   "author": "pitimon (https://github.com/pitimon)",
   "license": "MIT",
@@ -75,6 +75,7 @@
     "husky": "^9.1.7",
     "jsdom": "^29.0.1",
     "lint-staged": "^16.4.0",
+    "playwright": "^1.59.1",
     "shadcn": "^3.8.5",
     "vitest": "^4.1.2"
   },

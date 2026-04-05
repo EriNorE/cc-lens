@@ -6,7 +6,7 @@ import os from "os";
 export const dynamic = "force-dynamic";
 
 const CLAUDE_DIR = path.join(os.homedir(), ".claude");
-const VERSION = "0.2.7";
+const VERSION = "0.3.0";
 
 export async function GET() {
   let claudeDir = false;
