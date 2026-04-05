@@ -7,18 +7,20 @@ interface ModelPricing {
   cacheRead: number;
 }
 
+// Pricing from https://docs.anthropic.com/en/docs/about-claude/pricing
+// Cache Write = 5-minute cache (1.25x input). Cache Read = cache hit (0.1x input).
 export const PRICING: Record<string, ModelPricing> = {
   "claude-opus-4-6": {
-    input: 15.0 / 1_000_000,
-    output: 75.0 / 1_000_000,
-    cacheWrite: 18.75 / 1_000_000,
-    cacheRead: 1.5 / 1_000_000,
+    input: 5.0 / 1_000_000,
+    output: 25.0 / 1_000_000,
+    cacheWrite: 6.25 / 1_000_000,
+    cacheRead: 0.5 / 1_000_000,
   },
   "claude-opus-4-5-20251101": {
-    input: 15.0 / 1_000_000,
-    output: 75.0 / 1_000_000,
-    cacheWrite: 18.75 / 1_000_000,
-    cacheRead: 1.5 / 1_000_000,
+    input: 5.0 / 1_000_000,
+    output: 25.0 / 1_000_000,
+    cacheWrite: 6.25 / 1_000_000,
+    cacheRead: 0.5 / 1_000_000,
   },
   "claude-sonnet-4-6": {
     input: 3.0 / 1_000_000,
@@ -27,10 +29,10 @@ export const PRICING: Record<string, ModelPricing> = {
     cacheRead: 0.3 / 1_000_000,
   },
   "claude-haiku-4-5": {
-    input: 0.8 / 1_000_000,
-    output: 4.0 / 1_000_000,
-    cacheWrite: 1.0 / 1_000_000,
-    cacheRead: 0.08 / 1_000_000,
+    input: 1.0 / 1_000_000,
+    output: 5.0 / 1_000_000,
+    cacheWrite: 1.25 / 1_000_000,
+    cacheRead: 0.1 / 1_000_000,
   },
 };
 

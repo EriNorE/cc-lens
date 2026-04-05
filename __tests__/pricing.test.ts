@@ -87,7 +87,7 @@ describe("estimateCostFromUsage", () => {
     });
     const opusCost = estimateCostFromUsage("claude-opus-4-6", usage);
     const haikuCost = estimateCostFromUsage("claude-haiku-4-5", usage);
-    expect(opusCost).toBeGreaterThan(haikuCost * 10);
+    expect(opusCost).toBeGreaterThan(haikuCost * 4);
   });
 });
 

@@ -78,9 +78,9 @@ Pre-computed by Claude Code, stored at `~/.claude/stats-cache.json`. Read-only f
 
 | Model                    | Input $/M | Output $/M | Cache Write $/M | Cache Read $/M |
 | ------------------------ | --------- | ---------- | --------------- | -------------- |
-| claude-opus-4-6          | $15.00    | $75.00     | $18.75          | $1.50          |
-| claude-opus-4-5-20251101 | $15.00    | $75.00     | $18.75          | $1.50          |
+| claude-opus-4-6          | $5.00     | $25.00     | $6.25           | $0.50          |
+| claude-opus-4-5-20251101 | $5.00     | $25.00     | $6.25           | $0.50          |
 | claude-sonnet-4-6        | $3.00     | $15.00     | $3.75           | $0.30          |
-| claude-haiku-4-5         | $0.80     | $4.00      | $1.00           | $0.08          |
+| claude-haiku-4-5         | $1.00     | $5.00      | $1.25           | $0.10          |
 
 Fuzzy matching: model strings with date suffixes (e.g., `claude-haiku-4-5-20251001`) match their prefix.
