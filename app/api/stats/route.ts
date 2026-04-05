@@ -73,6 +73,7 @@ export async function GET() {
       ...periods,
       storageBytes,
       sessionCount: sessions.length,
+      firstSessionDate: sessions[sessions.length - 1]?.start_time ?? "",
     },
   });
 }
