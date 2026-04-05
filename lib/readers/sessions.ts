@@ -267,20 +267,20 @@ export async function readAllSessionMeta(): Promise<SessionMeta[]> {
   const dir = claudePath("usage-data", "session-meta");
   try {
     const files = await fs.readdir(dir);
-    const results: SessionMeta[] = [];
-    await Promise.all(
-      files
-        .filter((f) => f.endsWith(".json"))
-        .map(async (f) => {
-          try {
-            const raw = await fs.readFile(path.join(dir, f), "utf-8");
-            const parsed = JSON.parse(raw) as SessionMeta;
-            results.push(parsed);
-          } catch {
-            // Expected: skip malformed session meta files
-          }
-        }),
-    );
+    const results = (
+      await Promise.all(
+        files
+          .filter((f) => f.endsWith(".json"))
+          .map(async (f) => {
+            try {
+              const raw = await fs.readFile(path.join(dir, f), "utf-8");
+              return JSON.parse(raw) as SessionMeta;
+            } catch {
+              return null;
+            }
+          }),
+      )
+    ).filter((m): m is SessionMeta => m !== null);
     return results.sort(
       (a, b) =>
         new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),

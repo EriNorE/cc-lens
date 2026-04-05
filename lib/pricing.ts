@@ -49,7 +49,11 @@ function getPricing(model: string): ModelPricing {
       return PRICING[key];
     }
   }
-  if (model && model !== FALLBACK_MODEL) {
+  if (
+    model &&
+    model !== FALLBACK_MODEL &&
+    process.env.NODE_ENV !== "production"
+  ) {
     console.warn(
       `[cc-lens] Unknown model "${model}" — falling back to ${FALLBACK_MODEL} pricing`,
     );
