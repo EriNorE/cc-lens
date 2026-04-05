@@ -272,6 +272,8 @@ export interface HourlyCost {
 export interface CostAnalytics {
   total_cost: number;
   total_savings: number;
+  cache_read_cost: number;
+  cache_write_cost: number;
   models: ModelCostBreakdown[];
   daily: DailyCost[];
   hourly: HourlyCost[];

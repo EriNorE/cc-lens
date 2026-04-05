@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { TopBar } from "@/components/layout/top-bar";
 import {
@@ -54,24 +54,28 @@ export default function CostsPage() {
     fetcher,
     { refreshInterval: 5_000 },
   );
-  const [window, setWindow] = useState<CostWindow>(30);
+  const [costWindow, setCostWindow] = useState<CostWindow>(30);
+
+  useEffect(() => {
+    if (error) logger.error("Failed to load costs", { error: String(error) });
+  }, [error]);
 
   const filtered = useMemo(() => {
     if (!data) return null;
 
     // 1d: sum hourly data (last 24h)
-    if (window === 1) {
+    if (costWindow === 1) {
       return { cost: sumHourlyCost(data.hourly ?? []), savings: 0 };
     }
 
     // 7d/30d/90d/All: use shared filtering utility (single source of truth)
-    const days = filterDailyByWindow(data.daily, window);
+    const days = filterDailyByWindow(data.daily, costWindow);
     const cost = sumDailyCost(days);
     // For "All": fall back to stats-cache if JSONL daily is empty
-    const finalCost = window === 365 && cost === 0 ? data.total_cost : cost;
-    const savings = window === 365 ? data.total_savings : 0;
+    const finalCost = costWindow === 365 && cost === 0 ? data.total_cost : cost;
+    const savings = costWindow === 365 ? data.total_savings : 0;
     return { cost: finalCost, savings };
-  }, [data, window]);
+  }, [data, costWindow]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -80,15 +84,11 @@ export default function CostsPage() {
         subtitle="estimated spend from ~/.claude/"
       />
       <div className="p-6 space-y-6">
-        {error &&
-          (() => {
-            logger.error("Failed to load costs", { error: String(error) });
-            return (
-              <p className="text-[#f87171] text-sm font-mono">
-                Failed to load cost data
-              </p>
-            );
-          })()}
+        {error && (
+          <p className="text-[#f87171] text-sm font-mono">
+            Failed to load cost data
+          </p>
+        )}
         {isLoading && (
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -104,12 +104,19 @@ export default function CostsPage() {
                 <p className="text-[12px] text-muted-foreground uppercase tracking-wider">
                   Estimated Cost{" "}
                   <span className="text-foreground/50">
-                    ({windowLabel(window)})
+                    ({windowLabel(costWindow)})
                   </span>
                 </p>
                 <p className="text-2xl font-bold text-[#d97706]">
                   {formatCost(filtered.cost)}
                 </p>
+                {costWindow === 365 &&
+                  data.cache_read_cost + data.cache_write_cost > 0 && (
+                    <p className="text-[11px] text-muted-foreground/60 font-mono mt-0.5">
+                      incl. {formatCost(data.cache_read_cost)} cache read +{" "}
+                      {formatCost(data.cache_write_cost)} cache write
+                    </p>
+                  )}
               </div>
               {filtered.savings > 0 && (
                 <>
@@ -141,8 +148,8 @@ export default function CostsPage() {
                 <CostOverTimeChart
                   daily={data.daily}
                   hourly={data.hourly ?? []}
-                  window={window}
-                  onWindowChange={setWindow}
+                  window={costWindow}
+                  onWindowChange={setCostWindow}
                 />
               </Card>
             )}
@@ -160,7 +167,7 @@ export default function CostsPage() {
             </Card>
 
             {/* Cache efficiency */}
-            <Card title="Cache Efficiency">
+            <Card title="Cache Efficiency (all time)">
               <CacheEfficiencyPanel
                 models={data.models}
                 totalSavings={data.total_savings}
@@ -168,7 +175,7 @@ export default function CostsPage() {
             </Card>
 
             {/* Pricing reference */}
-            <Card title="Pricing Reference ⚠ Estimates Only">
+            <Card title="Pricing Reference — Estimates Only">
               <div className="overflow-x-auto">
                 <table className="w-full text-[13px] font-mono">
                   <thead>
@@ -210,7 +217,7 @@ export default function CostsPage() {
                   </tbody>
                 </table>
                 <p className="text-[12px] text-muted-foreground/50 mt-2">
-                  ⚠ These are estimates. Update pricing in{" "}
+                  Note: These are estimates. Update pricing in{" "}
                   <code className="text-muted-foreground">lib/pricing.ts</code>
                 </p>
               </div>
