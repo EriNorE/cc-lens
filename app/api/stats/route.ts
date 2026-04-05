@@ -4,52 +4,15 @@ import {
   getSessions,
   getClaudeStorageBytes,
 } from "@/lib/claude-reader";
-import { estimateTotalCostFromModel, getPricing } from "@/lib/pricing";
-import type { DailyActivity, SessionMeta } from "@/types/claude";
+import {
+  computeDailyActivityFromSessions,
+  mergeDailyActivity,
+  computeModelTotals,
+  computeTotalToolCalls,
+  computeSessionPeriods,
+} from "@/lib/stats-compute";
 
 export const dynamic = "force-dynamic";
-
-/** Compute daily activity from session JSONL — fresher than stats-cache */
-function computeDailyActivityFromSessions(
-  sessions: SessionMeta[],
-): DailyActivity[] {
-  const byDate = new Map<
-    string,
-    { messages: number; sessions: number; tools: number }
-  >();
-  for (const s of sessions) {
-    const date = s.start_time.slice(0, 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-    const existing = byDate.get(date) ?? { messages: 0, sessions: 0, tools: 0 };
-    existing.messages +=
-      (s.user_message_count ?? 0) + (s.assistant_message_count ?? 0);
-    existing.sessions += 1;
-    existing.tools += Object.values(s.tool_counts ?? {}).reduce(
-      (a, b) => a + b,
-      0,
-    );
-    byDate.set(date, existing);
-  }
-  return Array.from(byDate.entries())
-    .map(([date, { messages, sessions: count, tools }]) => ({
-      date,
-      messageCount: messages,
-      sessionCount: count,
-      toolCallCount: tools,
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
-}
-
-/** Merge stats dailyActivity with session-derived data; session data overrides for same dates */
-function mergeDailyActivity(
-  fromStats: DailyActivity[],
-  fromSessions: DailyActivity[],
-): DailyActivity[] {
-  const map = new Map<string, DailyActivity>();
-  for (const d of fromStats) map.set(d.date, d);
-  for (const d of fromSessions) map.set(d.date, d);
-  return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
-}
 
 export async function GET() {
   const [stats, sessions, storageBytes] = await Promise.all([
@@ -64,64 +27,16 @@ export async function GET() {
     : dailyFromSessions;
 
   const modelUsage = stats?.modelUsage ?? {};
+  const totals = computeModelTotals(modelUsage);
+  const toolCalls = computeTotalToolCalls(sessions);
+  const periods = computeSessionPeriods(sessions);
 
-  // Compute estimated total cost from modelUsage
-  let totalCost = 0;
-  let totalCacheSavings = 0;
-  for (const [model, usage] of Object.entries(modelUsage)) {
-    const cost = estimateTotalCostFromModel(model, usage);
-    totalCost += cost;
-    const p = getPricing(model);
-    totalCacheSavings +=
-      (usage.cacheReadInputTokens ?? 0) * (p.input - p.cacheRead);
-  }
-
-  // Compute total tokens
-  let totalInputTokens = 0;
-  let totalOutputTokens = 0;
-  let totalCacheReadTokens = 0;
-  let totalCacheWriteTokens = 0;
-  for (const usage of Object.values(modelUsage)) {
-    totalInputTokens += usage.inputTokens ?? 0;
-    totalOutputTokens += usage.outputTokens ?? 0;
-    totalCacheReadTokens += usage.cacheReadInputTokens ?? 0;
-    totalCacheWriteTokens += usage.cacheCreationInputTokens ?? 0;
-  }
-  // Total = input + output only (unique tokens processed)
-  // Cache tokens are shown separately — they overlap with input tokens
-  const totalTokens = totalInputTokens + totalOutputTokens;
-
-  // Aggregate tool calls total
-  let totalToolCalls = 0;
-  for (const s of sessions) {
-    for (const count of Object.values(s.tool_counts ?? {})) {
-      totalToolCalls += count;
-    }
-  }
-
-  // Active days (days with at least 1 session)
   const activeDays = dailyActivity.filter((d) => d.sessionCount > 0).length;
-
-  // Average session length
   const avgSessionMinutes =
     sessions.length > 0
       ? sessions.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0) /
         sessions.length
       : 0;
-
-  // Sessions this month & week (uses server-local timezone, which matches
-  // the client since cc-lens is localhost-only)
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - 7);
-
-  const sessionsThisMonth = sessions.filter(
-    (s) => new Date(s.start_time) >= monthStart,
-  ).length;
-  const sessionsThisWeek = sessions.filter(
-    (s) => new Date(s.start_time) >= weekStart,
-  ).length;
 
   const statsOut = stats
     ? { ...stats, dailyActivity }
@@ -151,18 +66,11 @@ export async function GET() {
   return NextResponse.json({
     stats: statsOut,
     computed: {
-      totalCost,
-      totalCacheSavings,
-      totalTokens,
-      totalInputTokens,
-      totalOutputTokens,
-      totalCacheReadTokens,
-      totalCacheWriteTokens,
-      totalToolCalls,
+      ...totals,
+      totalToolCalls: toolCalls,
       activeDays,
       avgSessionMinutes,
-      sessionsThisMonth,
-      sessionsThisWeek,
+      ...periods,
       storageBytes,
       sessionCount: sessions.length,
     },
