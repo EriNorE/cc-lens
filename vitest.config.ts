@@ -10,7 +10,14 @@ export default defineConfig({
       provider: "v8",
       include: ["lib/**/*.ts"],
       exclude: [
-        "lib/readers/**",
+        // Readers with tests: projects.ts, memory.ts — now included in coverage
+        // Readers without tests yet — exclude until integration tests added:
+        "lib/readers/content.ts",
+        "lib/readers/facets.ts",
+        "lib/readers/index.ts",
+        "lib/readers/sessions.ts",
+        "lib/readers/stats.ts",
+        "lib/readers/storage.ts",
         "lib/claude-reader.ts",
         "lib/logger.ts",
         "lib/cache.ts",
@@ -19,7 +26,7 @@ export default defineConfig({
         "lib/utils.ts",
       ],
       // Target: maintain 80% on testable lib modules (pure compute + utilities).
-      // lib/readers/ excluded — IO-heavy, tracked in separate backlog issue.
+      // Untested readers excluded individually — narrow as tests are added.
       // Branches lower at 60%: conditional paths in decode.ts and pricing.ts
       // fuzzy matching require integration-level tests to cover fully.
       thresholds: {
