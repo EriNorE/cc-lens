@@ -64,20 +64,30 @@ export async function GET() {
     { costs: Record<string, number>; total: number }
   >();
 
+  // Track cache cost breakdown per window for hero subtitle
+  // Headline cost includes all 4 token types by design — cache_read IS a real
+  // Anthropic charge, just 10x cheaper than regular input. This breakdown
+  // helps users understand what they're paying for.
+  let totalCacheReadCost = 0;
+  let totalCacheWriteCost = 0;
+
   for (const s of sessions) {
     const ts = s.start_time ?? "";
     if (!ts) continue;
     const date = ts.slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
 
-    // Use actual session model for pricing (not hardcoded Opus)
     const sessionModel = s.model ?? "claude-opus-4-6";
     const p = getPricing(sessionModel);
+    const cacheReadCost = (s.cache_read_input_tokens ?? 0) * p.cacheRead;
+    const cacheWriteCost = (s.cache_creation_input_tokens ?? 0) * p.cacheWrite;
     const cost =
       (s.input_tokens ?? 0) * p.input +
       (s.output_tokens ?? 0) * p.output +
-      (s.cache_creation_input_tokens ?? 0) * p.cacheWrite +
-      (s.cache_read_input_tokens ?? 0) * p.cacheRead;
+      cacheWriteCost +
+      cacheReadCost;
+    totalCacheReadCost += cacheReadCost;
+    totalCacheWriteCost += cacheWriteCost;
 
     // Daily aggregation
     const dayEntry = dailyMap.get(date) ?? { costs: {}, total: 0 };
@@ -141,13 +151,14 @@ export async function GET() {
     .sort((a, b) => b.estimated_cost - a.estimated_cost)
     .slice(0, 20);
 
-  const result: CostAnalytics = {
+  return NextResponse.json({
     total_cost: totalCost,
     total_savings: totalSavings,
+    cache_read_cost: totalCacheReadCost,
+    cache_write_cost: totalCacheWriteCost,
     models,
     daily,
     hourly,
     by_project,
-  };
-  return NextResponse.json(result);
+  } satisfies CostAnalytics);
 }
