@@ -120,7 +120,8 @@ export function OverviewClient() {
   const dateFrom = useMemo(() => {
     if (dateFromOverride) return dateFromOverride;
     if (data?.computed?.firstSessionDate) {
-      return format(new Date(data.computed.firstSessionDate), "MM/dd/yyyy");
+      const d = new Date(data.computed.firstSessionDate);
+      if (!isNaN(d.getTime())) return format(d, "MM/dd/yyyy");
     }
     return format(subDays(new Date(), 7), "MM/dd/yyyy");
   }, [dateFromOverride, data?.computed?.firstSessionDate]);
