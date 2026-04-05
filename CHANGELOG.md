@@ -2,7 +2,25 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
-## [Unreleased] — pitimon/cc-lens fork
+## [0.3.2] — 2026-04-05
+
+### Added
+
+- Cost hero subtitle showing cache read + cache write breakdown (All window only)
+- Cache Efficiency panel labeled "(all time)" to distinguish scope from hero
+- ADR-002: Dual cost sources design decision documented
+- CLAUDE.md, PRD.md, DOMAIN.md, PARITY.md project documentation
+
+### Fixed
+
+- Hero and chart now use same date filtering via `filterDailyByWindow()` (were divergent)
+- "All" window uses JSONL daily sum (was using stats-cache, causing cost jump)
+- logger.error moved from render to useEffect (was logging every 5s on SWR re-render)
+- Renamed `window` state to `costWindow` (was shadowing global)
+- Removed emoji from Pricing Reference card title
+- Restored eslint-disable for justified AnyLine type aliases (CI was failing)
+
+## [0.3.0] — 2026-04-05
 
 ### Added
 
