@@ -174,13 +174,17 @@ export function OverviewClient() {
 
   const { stats, computed } = data;
 
-  // Total = input + output only (unique tokens processed)
-  // Cache tokens shown separately — they overlap with input tokens
-  const total = computed.totalInputTokens + computed.totalOutputTokens;
+  // Separate denominators: I/O tokens and cache tokens are different dimensions.
+  // Cache read (2.3B) dwarfs input (518K) — using one total produces 38,000% values.
+  const ioTotal = computed.totalInputTokens + computed.totalOutputTokens;
+  const cacheTotal =
+    computed.totalCacheReadTokens + computed.totalCacheWriteTokens;
 
-  const tokenSegs = [
+  const ioSegs = [
     { label: "input", value: computed.totalInputTokens, color: "#60a5fa" },
     { label: "output", value: computed.totalOutputTokens, color: "#d97706" },
+  ];
+  const cacheSegs = [
     {
       label: "cache_read",
       value: computed.totalCacheReadTokens,
@@ -192,6 +196,7 @@ export function OverviewClient() {
       color: "#a78bfa",
     },
   ];
+  const tokenSegs = [...ioSegs, ...cacheSegs];
 
   return (
     <div className="px-8 py-6 space-y-8 bg-background">
@@ -286,37 +291,48 @@ export function OverviewClient() {
       {/* ── Token breakdown ── */}
       <div className="space-y-2 py-2">
         <div className="flex h-[3px] rounded overflow-hidden w-full">
-          {tokenSegs.map(({ label, value, color }) => (
-            <div
-              key={label}
-              style={{
-                width: `${(value / total) * 100}%`,
-                backgroundColor: color,
-              }}
-            />
-          ))}
+          {tokenSegs.map(({ label, value, color }) => {
+            const denom = ioSegs.some((s) => s.label === label)
+              ? ioTotal
+              : cacheTotal;
+            return (
+              <div
+                key={label}
+                style={{
+                  width: denom > 0 ? `${(value / denom) * 100}%` : "0%",
+                  backgroundColor: color,
+                }}
+              />
+            );
+          })}
         </div>
         <div className="flex flex-wrap gap-x-8 gap-y-1 items-baseline">
-          {tokenSegs.map(({ label, value, color }) => (
-            <span key={label} className="inline-flex items-baseline gap-1.5">
-              <span
-                className="inline-block w-1.5 h-1.5 rounded-full self-center shrink-0"
-                style={{ backgroundColor: color }}
-              />
-              <span className="text-[12px] text-muted-foreground font-mono">
-                {label}:
+          {tokenSegs.map(({ label, value, color }) => {
+            const denom = ioSegs.some((s) => s.label === label)
+              ? ioTotal
+              : cacheTotal;
+            const pct = denom > 0 ? Math.round((value / denom) * 100) : 0;
+            return (
+              <span key={label} className="inline-flex items-baseline gap-1.5">
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full self-center shrink-0"
+                  style={{ backgroundColor: color }}
+                />
+                <span className="text-[12px] text-muted-foreground font-mono">
+                  {label}:
+                </span>
+                <span
+                  className="text-[13px] font-bold tabular-nums font-mono"
+                  style={{ color }}
+                >
+                  {formatTokens(value)}
+                </span>
+                <span className="text-[12px] text-muted-foreground/60 font-mono">
+                  {pct}%
+                </span>
               </span>
-              <span
-                className="text-[13px] font-bold tabular-nums font-mono"
-                style={{ color }}
-              >
-                {formatTokens(value)}
-              </span>
-              <span className="text-[12px] text-muted-foreground/60 font-mono">
-                {Math.round((value / total) * 100)}%
-              </span>
-            </span>
-          ))}
+            );
+          })}
         </div>
       </div>
 
