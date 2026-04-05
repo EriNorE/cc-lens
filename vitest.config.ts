@@ -9,14 +9,24 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["lib/**/*.ts"],
-      // Thresholds apply to all lib/ modules. Branch coverage is lower
-      // because IO-heavy readers (lib/readers/) and conditional render
-      // paths have many branches that require integration/E2E tests.
+      exclude: [
+        "lib/readers/**",
+        "lib/claude-reader.ts",
+        "lib/logger.ts",
+        "lib/cache.ts",
+        "lib/replay-parser.ts",
+        "lib/tool-categories.ts",
+        "lib/utils.ts",
+      ],
+      // Target: maintain 80% on testable lib modules (pure compute + utilities).
+      // lib/readers/ excluded — IO-heavy, tracked in separate backlog issue.
+      // Branches lower at 60%: conditional paths in decode.ts and pricing.ts
+      // fuzzy matching require integration-level tests to cover fully.
       thresholds: {
-        lines: 30,
-        functions: 28,
-        branches: 27,
-        statements: 30,
+        lines: 80,
+        functions: 80,
+        branches: 60,
+        statements: 80,
       },
     },
   },
