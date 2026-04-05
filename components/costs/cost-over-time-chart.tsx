@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatCost } from "@/lib/decode";
+import { filterDailyByWindow } from "@/lib/costs-compute";
 import type { DailyCost, HourlyCost } from "@/types/claude";
 
 const MODEL_COLORS: Record<string, string> = {
@@ -68,9 +69,9 @@ export function CostOverTimeChart({
       };
     }
 
-    // Daily view
+    // Daily view — use same date cutoff as hero (shared utility)
     const sorted = [...daily].sort((a, b) => a.date.localeCompare(b.date));
-    const sliced = window === 365 ? sorted : sorted.slice(-window);
+    const sliced = filterDailyByWindow(sorted, window);
     const modelSet = new Set<string>();
     for (const d of sliced)
       Object.keys(d.costs ?? {}).forEach((m) => modelSet.add(m));

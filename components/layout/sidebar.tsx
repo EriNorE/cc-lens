@@ -128,7 +128,7 @@ export function Sidebar() {
       <div className="px-3 py-4 border-t border-sidebar-border flex items-center justify-between">
         {!collapsed && (
           <p className="text-sm text-sidebar-foreground/50 font-mono">
-            Made by Arindam
+            Made by pitimon
           </p>
         )}
         <button

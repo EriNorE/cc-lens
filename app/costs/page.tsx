@@ -12,6 +12,12 @@ import { ModelTokenTable } from "@/components/costs/model-token-table";
 import { CacheEfficiencyPanel } from "@/components/costs/cache-efficiency-panel";
 import { formatCost } from "@/lib/decode";
 import { PRICING } from "@/lib/pricing";
+import { logger } from "@/lib/logger";
+import {
+  filterDailyByWindow,
+  sumDailyCost,
+  sumHourlyCost,
+} from "@/lib/costs-compute";
 import type { CostAnalytics } from "@/types/claude";
 
 const fetcher = (url: string) =>
@@ -52,27 +58,19 @@ export default function CostsPage() {
 
   const filtered = useMemo(() => {
     if (!data) return null;
-    if (window === 365)
-      return { cost: data.total_cost, savings: data.total_savings };
 
-    // For 1d, sum hourly data (last 24h)
+    // 1d: sum hourly data (last 24h)
     if (window === 1) {
-      let cost = 0;
-      for (const h of data.hourly ?? []) cost += h.total;
-      return { cost, savings: 0 };
+      return { cost: sumHourlyCost(data.hourly ?? []), savings: 0 };
     }
 
-    // For 7d/30d/90d, sum daily data
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - window);
-    const cutoffStr = cutoff.toISOString().slice(0, 10);
-
-    let cost = 0;
-    for (const d of data.daily) {
-      if (d.date >= cutoffStr) cost += d.total;
-    }
-
-    return { cost, savings: 0 };
+    // 7d/30d/90d/All: use shared filtering utility (single source of truth)
+    const days = filterDailyByWindow(data.daily, window);
+    const cost = sumDailyCost(days);
+    // For "All": fall back to stats-cache if JSONL daily is empty
+    const finalCost = window === 365 && cost === 0 ? data.total_cost : cost;
+    const savings = window === 365 ? data.total_savings : 0;
+    return { cost: finalCost, savings };
   }, [data, window]);
 
   return (
@@ -82,11 +80,15 @@ export default function CostsPage() {
         subtitle="estimated spend from ~/.claude/"
       />
       <div className="p-6 space-y-6">
-        {error && (
-          <p className="text-[#f87171] text-sm font-mono">
-            Error: {String(error)}
-          </p>
-        )}
+        {error &&
+          (() => {
+            logger.error("Failed to load costs", { error: String(error) });
+            return (
+              <p className="text-[#f87171] text-sm font-mono">
+                Failed to load cost data
+              </p>
+            );
+          })()}
         {isLoading && (
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
