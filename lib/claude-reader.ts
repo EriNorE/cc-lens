@@ -148,7 +148,17 @@ export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
     pruneCache(cache, validPaths);
     await Promise.all([writeCache(cache), writeProjectPathCache(pathCache)]);
 
-    return results.sort(
+    // Deduplicate sessions by ID — keep the one with the latest start_time
+    const seen = new Map<string, SessionMeta>();
+    for (const meta of results) {
+      const existing = seen.get(meta.session_id);
+      if (!existing || meta.start_time > existing.start_time) {
+        seen.set(meta.session_id, meta);
+      }
+    }
+    const deduped = Array.from(seen.values());
+
+    return deduped.sort(
       (a, b) =>
         new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
     );

@@ -39,7 +39,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify-data": "node scripts/verify-data.mjs"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4",

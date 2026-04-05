@@ -109,7 +109,8 @@ export async function GET() {
         sessions.length
       : 0;
 
-  // Sessions this month & week
+  // Sessions this month & week (uses server-local timezone, which matches
+  // the client since cc-lens is localhost-only)
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const weekStart = new Date(now);
