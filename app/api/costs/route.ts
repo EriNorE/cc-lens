@@ -64,10 +64,11 @@ export async function GET() {
     { costs: Record<string, number>; total: number }
   >();
 
-  // Track cache cost breakdown per window for hero subtitle
+  // Track cache cost breakdown for hero subtitle (shown on "All" window only).
   // Headline cost includes all 4 token types by design — cache_read IS a real
-  // Anthropic charge, just 10x cheaper than regular input. This breakdown
-  // helps users understand what they're paying for.
+  // Anthropic charge, just 10x cheaper than regular input.
+  // NOTE: These are summed from JSONL sessions, not the stats-cache.
+  // They may differ slightly from total_cost when the stats cache is stale.
   let totalCacheReadCost = 0;
   let totalCacheWriteCost = 0;
 

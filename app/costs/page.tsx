@@ -110,12 +110,13 @@ export default function CostsPage() {
                 <p className="text-2xl font-bold text-[#d97706]">
                   {formatCost(filtered.cost)}
                 </p>
-                {data.cache_read_cost + data.cache_write_cost > 0 && (
-                  <p className="text-[11px] text-muted-foreground/60 font-mono mt-0.5">
-                    incl. {formatCost(data.cache_read_cost)} cache read +{" "}
-                    {formatCost(data.cache_write_cost)} cache write
-                  </p>
-                )}
+                {window === 365 &&
+                  data.cache_read_cost + data.cache_write_cost > 0 && (
+                    <p className="text-[11px] text-muted-foreground/60 font-mono mt-0.5">
+                      incl. {formatCost(data.cache_read_cost)} cache read +{" "}
+                      {formatCost(data.cache_write_cost)} cache write
+                    </p>
+                  )}
               </div>
               {filtered.savings > 0 && (
                 <>
