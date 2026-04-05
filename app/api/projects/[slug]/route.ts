@@ -5,6 +5,7 @@ import {
   listProjectJSONLFiles,
   readJSONLLines,
   resolveProjectPath,
+  isValidSlug,
 } from "@/lib/claude-reader";
 import { estimateCostFromUsage } from "@/lib/pricing";
 import { projectDisplayName } from "@/lib/decode";
@@ -20,7 +21,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  if (/[/\\]/.test(slug) || /\.\./.test(slug)) {
+  if (!isValidSlug(slug)) {
     return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
   }
   const projectPath = await resolveProjectPath(slug);

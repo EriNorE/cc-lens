@@ -258,7 +258,10 @@ export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
       (a, b) =>
         new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
     );
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[cc-lens] readSessionsFromProjectJSONL failed:", err);
+    }
     return [];
   }
 }
