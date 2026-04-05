@@ -104,6 +104,10 @@ function syncSource(pkg) {
       2,
     ),
   );
+  const lockSrc = path.join(PKG_DIR, "package-lock.json");
+  if (fs.existsSync(lockSrc)) {
+    fs.copyFileSync(lockSrc, path.join(CACHE_DIR, "package-lock.json"));
+  }
 }
 
 async function main() {
@@ -140,15 +144,11 @@ async function main() {
     if (needsInstall) {
       console.log(`  ${DIM}Setting up (first run, may take a minute)…${R}\n`);
       await new Promise((resolve, reject) => {
-        const install = spawn(
-          "npm",
-          ["install", "--prefer-offline", "--no-package-lock"],
-          {
-            cwd: CACHE_DIR,
-            stdio: "inherit",
-            shell: true,
-          },
-        );
+        const install = spawn("npm", ["install", "--prefer-offline"], {
+          cwd: CACHE_DIR,
+          stdio: "inherit",
+          shell: true,
+        });
         install.on("exit", (code) =>
           code === 0
             ? resolve()
