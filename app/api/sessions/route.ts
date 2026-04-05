@@ -13,6 +13,7 @@ import type { SessionWithFacet } from "@/types/claude";
 
 export const dynamic = "force-dynamic";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyLine = Record<string, any>;
 
 async function enrichSessions(sessions: { session_id: string }[]) {
