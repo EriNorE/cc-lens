@@ -2,6 +2,14 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.7.0] — 2026-04-06
+
+### Changed
+
+- **Project activity chart** — donut → horizontal bar chart (top 8, full names, session count in tooltip) (#130)
+- **Model distribution donut** — I/O tokens only (cache removed — was inflating Opus to 56%), % added to legend (#130)
+- **Project display names** — worktree paths grouped under parent (`pve--claude-worktrees-elion` → `pve`) (#131)
+
 ## [0.6.1] — 2026-04-06
 
 ### Changed
