@@ -2,6 +2,17 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.4.4] — 2026-04-06
+
+### Changed
+
+- **CLI uses `next build` + `next start` instead of `next dev`** — saves 1.5GB RAM (#78)
+  - RAM: 1,840 MB → ~300 MB
+  - CPU idle: ~100% → ~0%
+  - First page load: 2-5s → <0.5s
+  - Build runs once per version (~30-60s), then `next start` for all subsequent runs
+  - `--dev` flag available for contributors who need HMR
+
 ## [0.4.3] — 2026-04-06
 
 ### Fixed
