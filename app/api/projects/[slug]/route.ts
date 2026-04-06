@@ -22,7 +22,13 @@ export async function GET(
 ) {
   const { slug } = await params;
   if (!isValidSlug(slug)) {
-    return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
+    return NextResponse.json(
+      {
+        error:
+          "Invalid project slug — must not contain path separators or '..'",
+      },
+      { status: 400 },
+    );
   }
   const projectPath = await resolveProjectPath(slug);
   const allSessions = await getSessions();

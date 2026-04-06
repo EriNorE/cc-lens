@@ -259,9 +259,8 @@ export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
         new Date(b.start_time).getTime() - new Date(a.start_time).getTime(),
     );
   } catch (err) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("[cc-lens] readSessionsFromProjectJSONL failed:", err);
-    }
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[cc-lens] readSessionsFromProjectJSONL failed:", msg);
     return [];
   }
 }
@@ -307,10 +306,24 @@ export async function readSessionMeta(
   }
 }
 
-/** Get sessions: returns the larger of JSONL-derived and session-meta sets.
- *  Prevents oscillation when readSessionsFromProjectJSONL() transiently
- *  returns [] due to fs errors (catch-all at line 261). */
-export async function getSessions(): Promise<SessionMeta[]> {
+/** In-flight promise deduplication — all concurrent callers within 100ms
+ *  share the same promise, preventing cache race conditions when multiple
+ *  API routes call getSessions() simultaneously on page load. */
+let _sessionsPromise: Promise<SessionMeta[]> | null = null;
+
+export function getSessions(): Promise<SessionMeta[]> {
+  if (!_sessionsPromise) {
+    _sessionsPromise = _getSessionsImpl();
+    _sessionsPromise.finally(() => {
+      setTimeout(() => {
+        _sessionsPromise = null;
+      }, 100);
+    });
+  }
+  return _sessionsPromise;
+}
+
+async function _getSessionsImpl(): Promise<SessionMeta[]> {
   const [jsonl, meta] = await Promise.all([
     readSessionsFromProjectJSONL(),
     readAllSessionMeta(),
