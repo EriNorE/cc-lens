@@ -151,9 +151,47 @@ export async function GET() {
     });
   }
 
+  // Group worktrees under parent — merge by display_name
+  // e.g. "pve" + 6 worktrees (elion, sanderson...) → 1 "pve" entry
+  const grouped = new Map<string, ProjectSummary>();
+  for (const p of projects) {
+    const existing = grouped.get(p.display_name);
+    if (!existing) {
+      grouped.set(p.display_name, p);
+    } else {
+      grouped.set(p.display_name, {
+        ...existing,
+        session_count: existing.session_count + p.session_count,
+        total_messages: existing.total_messages + p.total_messages,
+        total_duration_minutes:
+          existing.total_duration_minutes + p.total_duration_minutes,
+        total_lines_added: existing.total_lines_added + p.total_lines_added,
+        total_lines_removed:
+          existing.total_lines_removed + p.total_lines_removed,
+        total_files_modified:
+          existing.total_files_modified + p.total_files_modified,
+        git_commits: existing.git_commits + p.git_commits,
+        git_pushes: existing.git_pushes + p.git_pushes,
+        estimated_cost: existing.estimated_cost + p.estimated_cost,
+        input_tokens: existing.input_tokens + p.input_tokens,
+        output_tokens: existing.output_tokens + p.output_tokens,
+        last_active:
+          p.last_active > existing.last_active
+            ? p.last_active
+            : existing.last_active,
+        first_active:
+          p.first_active < existing.first_active
+            ? p.first_active
+            : existing.first_active,
+        uses_mcp: existing.uses_mcp || p.uses_mcp,
+        uses_task_agent: existing.uses_task_agent || p.uses_task_agent,
+      });
+    }
+  }
+
+  const merged = Array.from(grouped.values());
+
   return NextResponse.json({
-    projects: projects.sort((a, b) =>
-      b.last_active.localeCompare(a.last_active),
-    ),
+    projects: merged.sort((a, b) => b.last_active.localeCompare(a.last_active)),
   });
 }
