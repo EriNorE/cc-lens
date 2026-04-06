@@ -28,7 +28,7 @@ cc-lens targets WCAG 2.1 Level A compliance for a localhost developer tool.
 
 ### Automated
 
-Install `@axe-core/playwright` and run:
+`@axe-core/playwright` is wired into the E2E test suite. Run:
 
 ```bash
 node scripts/e2e-test.mjs  # includes axe scan on overview page

@@ -32,6 +32,9 @@ export function WelcomeOverlay() {
       role="dialog"
       aria-modal="true"
       aria-label="Welcome to cc-lens"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") dismiss();
+      }}
     >
       <div className="bg-card border border-border rounded-xl shadow-2xl max-w-md mx-4 p-8 space-y-5">
         <h2 className="text-xl font-bold text-foreground font-mono">
