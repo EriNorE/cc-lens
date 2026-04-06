@@ -109,7 +109,7 @@ export function UsageOverTimeChart({ data, days = 90, dateFrom, dateTo }: Props)
   }
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
+    <div role="img" aria-label="Token usage over time chart"><ResponsiveContainer width="100%" height={220}>
       <AreaChart data={filtered} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
         <defs>
           <linearGradient id="gradMessages" x1="0" y1="0" x2="0" y2="1">
@@ -161,6 +161,6 @@ export function UsageOverTimeChart({ data, days = 90, dateFrom, dateTo }: Props)
           activeDot={{ r: 3, fill: '#6ee7b7' }}
         />
       </AreaChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></div>
   )
 }

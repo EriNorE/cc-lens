@@ -52,7 +52,7 @@ export default function HistoryPage() {
     <div className="flex flex-col min-h-screen">
       <TopBar title="claude-code-lens · history" subtitle="~/.claude/history.jsonl" />
       <div className="p-4 md:p-6 space-y-4">
-        {error && <p className="text-[#f87171] text-sm font-mono">Error: {String(error)}</p>}
+        {error && <p className="text-[#f87171] text-sm font-mono">Failed to load data. Try refreshing.</p>}
         {isLoading && (
           <div className="space-y-2">
             {Array.from({ length: 8 }).map((_, i) => (

@@ -42,7 +42,7 @@ export default function ProjectsPage() {
         subtitle={data ? `${data.projects.length} projects` : 'loading...'}
       />
       <div className="p-6 space-y-4">
-        {error && <p className="text-[#f87171] text-sm font-mono">Error: {String(error)}</p>}
+        {error && <p className="text-[#f87171] text-sm font-mono">Failed to load data. Try refreshing.</p>}
 
         <div className="flex flex-wrap gap-2 items-center">
           <input

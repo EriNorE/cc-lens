@@ -31,7 +31,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ id: st
       <div className="flex flex-col min-h-screen">
         <TopBar title="session replay" subtitle="error" />
         <div className="p-6 text-[#f87171] text-sm font-mono">
-          Error: {String(replayError)}
+          Failed to load session replay. Try refreshing.
         </div>
       </div>
     )

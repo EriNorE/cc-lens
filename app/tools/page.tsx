@@ -29,7 +29,7 @@ export default function ToolsPage() {
     <div className="flex flex-col min-h-screen">
       <TopBar title="claude-code-analytics · tools & features" subtitle="every tool call, MCP server, and feature" />
       <div className="p-6 space-y-6">
-        {error && <p className="text-[#f87171] text-sm font-mono">Error: {String(error)}</p>}
+        {error && <p className="text-[#f87171] text-sm font-mono">Failed to load data. Try refreshing.</p>}
         {isLoading && (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (

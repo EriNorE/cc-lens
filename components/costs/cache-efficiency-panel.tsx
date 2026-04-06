@@ -50,7 +50,7 @@ export function CacheEfficiencyPanel({ models, totalSavings }: Props) {
           </div>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={140}>
+      <div role="img" aria-label="Cache efficiency chart"><ResponsiveContainer width="100%" height={140}>
         <PieChart>
           <Pie
             data={pieData}
@@ -70,7 +70,7 @@ export function CacheEfficiencyPanel({ models, totalSavings }: Props) {
             formatter={(val: number | undefined, name?: string) => [formatTokens(val ?? 0), name ?? '']}
           />
         </PieChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer></div>
     </div>
   )
 }

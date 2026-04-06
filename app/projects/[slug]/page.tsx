@@ -34,7 +34,7 @@ export default function ProjectDetailPage() {
     return (
       <div className="flex flex-col min-h-screen">
         <TopBar title="project detail" subtitle="error" />
-        <div className="p-6 text-[#f87171] text-sm font-mono">Error: {String(error)}</div>
+        <div className="p-6 text-[#f87171] text-sm font-mono">Failed to load project data. Try refreshing.</div>
       </div>
     )
   }

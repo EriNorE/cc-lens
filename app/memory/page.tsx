@@ -78,7 +78,7 @@ function MemoryCard({ entry, onClick, expanded }: { entry: MemoryEntry; onClick:
         mutate('/api/memory')
       }
     } catch (err) {
-      setSaveError(String(err))
+      setSaveError("Failed to save. Check file permissions.")
     } finally {
       setSaving(false)
     }

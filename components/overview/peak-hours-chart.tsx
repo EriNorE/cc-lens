@@ -50,7 +50,7 @@ export function PeakHoursChart({ hourCounts }: Props) {
 
   return (
     <div>
-      <ResponsiveContainer width="100%" height={160}>
+      <div role="img" aria-label="Peak hours activity chart"><ResponsiveContainer width="100%" height={160}>
         <BarChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
@@ -78,7 +78,7 @@ export function PeakHoursChart({ hourCounts }: Props) {
             ))}
           </Bar>
         </BarChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer></div>
       <p className="text-[11px] font-mono text-muted-foreground/60 mt-1">
         top 3 peak hours highlighted
       </p>

@@ -155,7 +155,7 @@ export function OverviewClient() {
   if (error) {
     return (
       <div className="px-8 py-6 text-destructive text-sm font-mono">
-        ✗ error loading data: {String(error)}
+        Failed to load dashboard data. Try refreshing.
       </div>
     );
   }

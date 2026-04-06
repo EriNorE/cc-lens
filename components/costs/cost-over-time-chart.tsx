@@ -110,7 +110,7 @@ export function CostOverTimeChart({
           No data for this period
         </p>
       ) : (
-        <ResponsiveContainer width="100%" height={200}>
+        <div role="img" aria-label="Cost over time chart"><ResponsiveContainer width="100%" height={200}>
           <AreaChart
             data={data}
             margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
@@ -154,7 +154,7 @@ export function CostOverTimeChart({
               />
             ))}
           </AreaChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer></div>
       )}
     </div>
   );

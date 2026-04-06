@@ -14,7 +14,7 @@ export function CostByProjectChart({ projects }: Props) {
   return (
     <div>
       <h3 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Cost by Project</h3>
-      <ResponsiveContainer width="100%" height={Math.max(120, top.length * 28)}>
+      <div role="img" aria-label="Cost by project chart"><ResponsiveContainer width="100%" height={Math.max(120, top.length * 28)}>
         <BarChart data={top} layout="vertical" margin={{ top: 0, right: 60, bottom: 0, left: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
           <XAxis
@@ -42,7 +42,7 @@ export function CostByProjectChart({ projects }: Props) {
             ))}
           </Bar>
         </BarChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer></div>
     </div>
   )
 }
