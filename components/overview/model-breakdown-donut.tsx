@@ -47,17 +47,16 @@ function CustomTooltip({ active, payload }: any) {
 }
 
 export function ModelBreakdownDonut({ modelUsage }: Props) {
+  // I/O tokens only — cache tokens are a different dimension and inflate Opus disproportionately
   const data = Object.entries(modelUsage)
     .map(([model, usage]) => ({
       name: shortModelName(model),
-      value:
-        (usage.inputTokens ?? 0) +
-        (usage.outputTokens ?? 0) +
-        (usage.cacheReadInputTokens ?? 0) +
-        (usage.cacheCreationInputTokens ?? 0),
+      value: (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0),
     }))
     .filter((d) => d.value > 0)
     .sort((a, b) => b.value - a.value);
+
+  const total = data.reduce((s, d) => s + d.value, 0);
 
   if (data.length === 0) {
     return (
@@ -90,11 +89,17 @@ export function ModelBreakdownDonut({ modelUsage }: Props) {
             iconType="circle"
             iconSize={8}
             wrapperStyle={{ fontSize: 12 }}
-            formatter={(value) => (
-              <span style={{ color: "var(--muted-foreground)", fontSize: 12 }}>
-                {value}
-              </span>
-            )}
+            formatter={(value: string, _entry: unknown, index: number) => {
+              const pct =
+                total > 0 ? Math.round((data[index].value / total) * 100) : 0;
+              return (
+                <span
+                  style={{ color: "var(--muted-foreground)", fontSize: 12 }}
+                >
+                  {value} ({pct}%)
+                </span>
+              );
+            }}
           />
         </PieChart>
       </ResponsiveContainer>
