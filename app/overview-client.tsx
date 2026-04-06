@@ -2,12 +2,12 @@
 
 import { useState, useMemo } from "react";
 import useSWR from "swr";
+import Link from "next/link";
 import { BarChart3, PieChart } from "lucide-react";
 import { UsageOverTimeChart } from "@/components/overview/usage-over-time-chart";
 import { ModelBreakdownDonut } from "@/components/overview/model-breakdown-donut";
 import { ProjectActivityDonut } from "@/components/overview/project-activity-donut";
 import { PeakHoursChart } from "@/components/overview/peak-hours-chart";
-import { OverviewConversationTable } from "@/components/overview/conversation-table";
 import { formatTokens, formatBytes } from "@/lib/decode";
 import type { StatsCache } from "@/types/claude";
 import type { SessionWithFacet } from "@/types/claude";
@@ -345,10 +345,18 @@ export function OverviewClient() {
         </div>
       </div>
 
-      {/* ── Conversations table ── */}
-      <ChartCard title="Recent conversations">
-        <OverviewConversationTable sessions={sessions} />
-      </ChartCard>
+      {/* ── Sessions link (table moved to /sessions to reduce cognitive load) ── */}
+      <div className="flex items-center justify-between border border-border rounded-lg bg-card px-5 py-3">
+        <span className="text-[13px] text-muted-foreground font-mono">
+          {sessions.length} recent conversations
+        </span>
+        <Link
+          href="/sessions"
+          className="text-[13px] font-mono text-primary hover:text-primary/80 transition-colors"
+        >
+          View all sessions &rarr;
+        </Link>
+      </div>
     </div>
   );
 }
