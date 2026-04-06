@@ -143,7 +143,8 @@ export function OverviewClient() {
     const usage: Record<string, { inputTokens: number; outputTokens: number }> =
       {};
     for (const s of sessions) {
-      if (!s.model) continue;
+      // Skip empty, internal (<synthetic>), and non-claude models
+      if (!s.model || !s.model.startsWith("claude-")) continue;
       const existing = usage[s.model] ?? { inputTokens: 0, outputTokens: 0 };
       usage[s.model] = {
         inputTokens: existing.inputTokens + (s.input_tokens ?? 0),
