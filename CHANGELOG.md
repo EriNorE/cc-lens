@@ -2,6 +2,23 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.6.1] — 2026-04-06
+
+### Changed
+
+- **Cache immutable patterns** — `setCachedEntry`, `pruneCache`, `setCachedProjectPath` return new objects (#108)
+- **CSP: removed `unsafe-eval`** — standalone production build doesn't need it (#109)
+
+### Added
+
+- **`--no-browser` CLI flag** — skip browser open for headless/daemon use (#126)
+- **systemd service guide** — `docs/systemd.md` + `cc-lens.service.example` for running as daemon (#126)
+
+### Fixed
+
+- **Overview "From" date** — uses earliest dailyActivity date instead of JSONL session (was missing 2+ months) (#124)
+- **Conversations table restored** on overview + "View all sessions" link (#125)
+
 ## [0.6.0] — 2026-04-06
 
 ### Changed
