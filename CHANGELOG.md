@@ -2,6 +2,21 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.6.0] — 2026-04-06
+
+### Changed
+
+- **Sidebar navigation grouped** — 12 flat items → 4 semantic sections: Analytics, Workspace, Planning, System (Miller's Law 7±2) (#112)
+- **Overview cognitive load reduced** — conversations table replaced with "View all sessions →" link, 12 chunks → ~9 (#113)
+- **Chart colors use CSS variables** — `var(--chart-1)` through `var(--chart-5)` in 7 components, theme-adaptive (#117)
+- **Dark mode chart contrast boosted** — `--chart-1` from `#d97706` → `#f59e0b`, area fill opacity increased (#114)
+- **Breadcrumbs on sub-pages** — /sessions/[id] and /projects/[slug] show clickable parent navigation (#115)
+- **2-tier navigation hierarchy** — sidebar groups + breadcrumbs establish primary/secondary navigation (#116)
+
+### Research
+
+Based on: [Miller's Law](https://lawsofux.com/millers-law/), [Airbnb DLS](https://principles.design/examples/airbnb-design-principles), [Google PAIR](https://pair.withgoogle.com/guidebook/), [Microsoft RAI](https://www.microsoft.com/en-us/ai/responsible-ai), [OECD AI Principles](https://oecd.ai/en/ai-principles), [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+
 ## [0.5.2] — 2026-04-06
 
 ### Added
