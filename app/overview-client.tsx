@@ -266,7 +266,7 @@ export function OverviewClient() {
         </div>
       </div>
 
-      {/* ── Charts row 1: Token usage + Project activity ── */}
+      {/* ── Charts row 1: Token usage + Model distribution ── */}
       <div className="grid grid-cols-[1fr_320px] gap-6">
         <ChartCard
           icon={<BarChart3 className="w-4 h-4" />}
@@ -281,20 +281,19 @@ export function OverviewClient() {
         </ChartCard>
         <ChartCard
           icon={<PieChart className="w-4 h-4" />}
-          title="Project activity distribution"
+          title="Model distribution"
         >
-          <ProjectActivityChart projects={projects} />
+          <ModelBreakdownDonut modelUsage={stats.modelUsage} />
         </ChartCard>
       </div>
 
-      {/* ── Peak hours + model breakdown ── */}
-      <div className="grid grid-cols-2 gap-6">
+      {/* ── Charts row 2: Project activity (wide) + Peak hours (narrow) ── */}
+      <div className="grid grid-cols-[1fr_320px] gap-6">
+        <ChartCard title="Project activity">
+          <ProjectActivityChart projects={projects} />
+        </ChartCard>
         <ChartCard title="Peak hours">
           <PeakHoursChart hourCounts={stats.hourCounts ?? {}} />
-        </ChartCard>
-
-        <ChartCard title="Model distribution">
-          <ModelBreakdownDonut modelUsage={stats.modelUsage} />
         </ChartCard>
       </div>
 
