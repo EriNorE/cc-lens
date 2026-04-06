@@ -1,42 +1,68 @@
-'use client'
+"use client";
 
-import { useParams } from 'next/navigation'
-import useSWR from 'swr'
-import Link from 'next/link'
-import { TopBar } from '@/components/layout/top-bar'
-import { formatCost, formatDuration, formatDate, formatTokens } from '@/lib/decode'
-import { CATEGORY_COLORS, categorizeTool } from '@/lib/tool-categories'
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import type { SessionWithFacet } from '@/types/claude'
+import { useParams } from "next/navigation";
+import useSWR from "swr";
+import Link from "next/link";
+import { TopBar } from "@/components/layout/top-bar";
+import {
+  formatCost,
+  formatDuration,
+  formatDate,
+  formatTokens,
+} from "@/lib/decode";
+import { CATEGORY_COLORS, categorizeTool } from "@/lib/tool-categories";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import type { SessionWithFacet } from "@/types/claude";
 
 const fetcher = (url: string) =>
-  fetch(url).then(r => { if (!r.ok) throw new Error(`API error ${r.status}`); return r.json() })
+  fetch(url).then((r) => {
+    if (!r.ok) throw new Error(`API error ${r.status}`);
+    return r.json();
+  });
 
 interface ProjectDetail {
-  project_path: string
-  display_name: string
-  sessions: SessionWithFacet[]
-  tool_counts: Record<string, number>
-  cost_by_session: Array<{ session_id: string; start_time: string; cost: number; messages: number }>
-  branches: Array<{ branch: string; turns: number }>
+  project_path: string;
+  display_name: string;
+  sessions: SessionWithFacet[];
+  tool_counts: Record<string, number>;
+  cost_by_session: Array<{
+    session_id: string;
+    start_time: string;
+    cost: number;
+    messages: number;
+  }>;
+  branches: Array<{ branch: string; turns: number }>;
 }
 
 export default function ProjectDetailPage() {
-  const params = useParams()
-  const slug = params?.slug as string
+  const params = useParams();
+  const slug = params?.slug as string;
 
   const { data, error, isLoading } = useSWR<ProjectDetail>(
     slug ? `/api/projects/${slug}` : null,
-    fetcher
-  )
+    fetcher,
+  );
 
   if (error) {
     return (
       <div className="flex flex-col min-h-screen">
         <TopBar title="project detail" subtitle="error" />
-        <div className="p-6 text-[#f87171] text-sm font-mono">Failed to load project data. Try refreshing.</div>
+        <div className="p-6 text-[#f87171] text-sm font-mono">
+          Failed to load project data. Try refreshing.
+        </div>
       </div>
-    )
+    );
   }
 
   if (isLoading || !data) {
@@ -49,86 +75,150 @@ export default function ProjectDetailPage() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   const topTools = Object.entries(data.tool_counts ?? {})
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 10)
-  const maxToolCount = topTools[0]?.[1] ?? 1
+    .slice(0, 10);
+  const maxToolCount = topTools[0]?.[1] ?? 1;
 
-  const totalCost = (data.sessions ?? []).reduce((s, x) => s + (x.estimated_cost ?? 0), 0)
-  const totalMsgs = (data.sessions ?? []).reduce((s, x) => s + (x.user_message_count ?? 0) + (x.assistant_message_count ?? 0), 0)
-  const totalDuration = (data.sessions ?? []).reduce((s, x) => s + (x.duration_minutes ?? 0), 0)
+  const totalCost = (data.sessions ?? []).reduce(
+    (s, x) => s + (x.estimated_cost ?? 0),
+    0,
+  );
+  const totalMsgs = (data.sessions ?? []).reduce(
+    (s, x) =>
+      s + (x.user_message_count ?? 0) + (x.assistant_message_count ?? 0),
+    0,
+  );
+  const totalDuration = (data.sessions ?? []).reduce(
+    (s, x) => s + (x.duration_minutes ?? 0),
+    0,
+  );
 
   // Language aggregation
-  const langMap: Record<string, number> = {}
-  for (const s of (data.sessions ?? [])) {
+  const langMap: Record<string, number> = {};
+  for (const s of data.sessions ?? []) {
     for (const [lang, count] of Object.entries(s.languages ?? {})) {
-      langMap[lang] = (langMap[lang] ?? 0) + count
+      langMap[lang] = (langMap[lang] ?? 0) + count;
     }
   }
-  const topLangs = Object.entries(langMap).sort(([, a], [, b]) => b - a).slice(0, 6)
-  const LANG_COLORS = ['#d97706', '#60a5fa', '#34d399', '#a78bfa', '#fbbf24', '#f87171']
+  const topLangs = Object.entries(langMap)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 6);
+  const LANG_COLORS = [
+    "#d97706",
+    "#60a5fa",
+    "#34d399",
+    "#a78bfa",
+    "#fbbf24",
+    "#f87171",
+  ];
 
-  const branches = data.branches ?? []
-  const sessions = data.sessions ?? []
-  const costBySessions = data.cost_by_session ?? []
-  const maxBranchTurns = branches[0]?.turns ?? 1
+  const branches = data.branches ?? [];
+  const sessions = data.sessions ?? [];
+  const costBySessions = data.cost_by_session ?? [];
+  const maxBranchTurns = branches[0]?.turns ?? 1;
 
   return (
     <div className="flex flex-col min-h-screen">
       <TopBar
         title={`${data.display_name}`}
         subtitle={`${sessions.length} sessions · ${formatCost(totalCost)} · ${formatDuration(totalDuration)}`}
+        breadcrumbs={[{ label: "projects", href: "/projects" }]}
       />
 
       <div className="p-6 space-y-6">
-        <Link href="/projects" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">
+        <Link
+          href="/projects"
+          className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+        >
           ← back to projects
         </Link>
 
-        <div className="text-[12px] text-muted-foreground/50 font-mono">{data.project_path}</div>
+        <div className="text-[12px] text-muted-foreground/50 font-mono">
+          {data.project_path}
+        </div>
 
         {/* Stats row */}
         <div className="flex flex-wrap gap-6 py-3 border-y border-border text-[13px]">
-          <span className="text-muted-foreground">sessions: <span className="text-foreground font-bold">{sessions.length}</span></span>
+          <span className="text-muted-foreground">
+            sessions:{" "}
+            <span className="text-foreground font-bold">{sessions.length}</span>
+          </span>
           <span className="text-border">·</span>
-          <span className="text-muted-foreground">messages: <span className="text-foreground font-bold">{totalMsgs.toLocaleString()}</span></span>
+          <span className="text-muted-foreground">
+            messages:{" "}
+            <span className="text-foreground font-bold">
+              {totalMsgs.toLocaleString()}
+            </span>
+          </span>
           <span className="text-border">·</span>
-          <span className="text-muted-foreground">cost: <span className="text-[#d97706] font-bold">{formatCost(totalCost)}</span></span>
+          <span className="text-muted-foreground">
+            cost:{" "}
+            <span className="text-[#d97706] font-bold">
+              {formatCost(totalCost)}
+            </span>
+          </span>
           <span className="text-border">·</span>
-          <span className="text-muted-foreground">duration: <span className="text-foreground font-bold">{formatDuration(totalDuration)}</span></span>
+          <span className="text-muted-foreground">
+            duration:{" "}
+            <span className="text-foreground font-bold">
+              {formatDuration(totalDuration)}
+            </span>
+          </span>
         </div>
 
         <div className="grid grid-cols-[1fr_260px] gap-6">
           {/* Sessions list */}
           <div>
-            <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Sessions</h2>
+            <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+              Sessions
+            </h2>
             <div className="border border-border rounded overflow-hidden">
               <table className="w-full text-[13px]">
                 <thead>
                   <tr className="border-b border-border bg-muted">
-                    {['Date', 'Slug', 'Msgs', 'Cost'].map(h => (
-                      <th key={h} className={`px-3 py-2 text-[12px] font-bold text-muted-foreground uppercase tracking-wider ${h === 'Date' || h === 'Slug' ? 'text-left' : 'text-right'}`}>{h}</th>
+                    {["Date", "Slug", "Msgs", "Cost"].map((h) => (
+                      <th
+                        key={h}
+                        className={`px-3 py-2 text-[12px] font-bold text-muted-foreground uppercase tracking-wider ${h === "Date" || h === "Slug" ? "text-left" : "text-right"}`}
+                      >
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {sessions.map((s, i) => {
-                    const msgs = (s.user_message_count ?? 0) + (s.assistant_message_count ?? 0)
+                    const msgs =
+                      (s.user_message_count ?? 0) +
+                      (s.assistant_message_count ?? 0);
                     return (
-                      <tr key={s.session_id} className={`border-b border-border/30 hover:bg-muted/50 transition-colors ${i % 2 ? 'bg-muted/20' : ''}`}>
-                        <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{formatDate(s.start_time)}</td>
+                      <tr
+                        key={s.session_id}
+                        className={`border-b border-border/30 hover:bg-muted/50 transition-colors ${i % 2 ? "bg-muted/20" : ""}`}
+                      >
+                        <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
+                          {formatDate(s.start_time)}
+                        </td>
                         <td className="px-3 py-2">
-                          <Link href={`/sessions/${s.session_id}`} className="text-foreground hover:text-primary transition-colors">
+                          <Link
+                            href={`/sessions/${s.session_id}`}
+                            className="text-foreground hover:text-primary transition-colors"
+                          >
                             {s.slug ?? s.session_id.slice(0, 8)}
                           </Link>
                         </td>
-                        <td className="px-3 py-2 text-right text-muted-foreground">{msgs}</td>
-                        <td className="px-3 py-2 text-right text-[#d97706] font-mono">{formatCost(s.estimated_cost)}</td>
+                        <td className="px-3 py-2 text-right text-muted-foreground">
+                          {msgs}
+                        </td>
+                        <td className="px-3 py-2 text-right text-[#d97706] font-mono">
+                          {formatCost(s.estimated_cost)}
+                        </td>
                       </tr>
-                    )
+                    );
                   })}
                 </tbody>
               </table>
@@ -137,21 +227,36 @@ export default function ProjectDetailPage() {
 
           {/* Tools sidebar */}
           <div>
-            <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Most-Used Tools</h2>
+            <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+              Most-Used Tools
+            </h2>
             <div className="space-y-1.5 text-[13px]">
               {topTools.map(([tool, count]) => {
-                const cat = categorizeTool(tool)
-                const color = CATEGORY_COLORS[cat]
-                const width = Math.max(4, Math.round((count / maxToolCount) * 100))
+                const cat = categorizeTool(tool);
+                const color = CATEGORY_COLORS[cat];
+                const width = Math.max(
+                  4,
+                  Math.round((count / maxToolCount) * 100),
+                );
                 return (
                   <div key={tool} className="flex items-center gap-2">
-                    <span className="text-muted-foreground/70 w-24 truncate text-[12px]">{tool}</span>
+                    <span className="text-muted-foreground/70 w-24 truncate text-[12px]">
+                      {tool}
+                    </span>
                     <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${width}%`, backgroundColor: color + '90' }} />
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${width}%`,
+                          backgroundColor: color + "90",
+                        }}
+                      />
                     </div>
-                    <span className="text-muted-foreground/50 text-[12px] w-8 text-right">{count}</span>
+                    <span className="text-muted-foreground/50 text-[12px] w-8 text-right">
+                      {count}
+                    </span>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
@@ -160,10 +265,12 @@ export default function ProjectDetailPage() {
         {/* Cost over time chart */}
         {costBySessions.length > 1 && (
           <div className="border border-border rounded bg-card p-4 overflow-visible">
-            <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Cost Per Session</h2>
+            <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+              Cost Per Session
+            </h2>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart
-                data={costBySessions.map(s => ({
+                data={costBySessions.map((s) => ({
                   date: s.start_time.slice(0, 10),
                   cost: s.cost,
                 }))}
@@ -172,24 +279,38 @@ export default function ProjectDetailPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"
                   height={36}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={v => `$${v.toFixed(2)}`}
+                  tickFormatter={(v) => `$${v.toFixed(2)}`}
                   width={52}
                 />
                 <Tooltip
-                  contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}
-                  formatter={(v: number | undefined) => [formatCost(v ?? 0), 'Cost']}
+                  contentStyle={{
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 4,
+                    fontSize: 12,
+                  }}
+                  formatter={(v: number | undefined) => [
+                    formatCost(v ?? 0),
+                    "Cost",
+                  ]}
                 />
-                <Line type="monotone" dataKey="cost" stroke="#d97706" strokeWidth={2} dot={{ r: 3, fill: '#d97706' }} />
+                <Line
+                  type="monotone"
+                  dataKey="cost"
+                  stroke="#d97706"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: "#d97706" }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -200,19 +321,39 @@ export default function ProjectDetailPage() {
           {/* Language donut */}
           {topLangs.length > 0 && (
             <div className="border border-border rounded bg-card p-4">
-              <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Languages</h2>
+              <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+                Languages
+              </h2>
               <div className="flex items-center gap-4">
                 <ResponsiveContainer width={100} height={100}>
                   <PieChart>
-                    <Pie data={topLangs.map(([name, value]) => ({ name, value }))} cx="50%" cy="50%" innerRadius={28} outerRadius={46} dataKey="value" strokeWidth={0}>
-                      {topLangs.map((_, i) => <Cell key={i} fill={LANG_COLORS[i % LANG_COLORS.length]} />)}
+                    <Pie
+                      data={topLangs.map(([name, value]) => ({ name, value }))}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={28}
+                      outerRadius={46}
+                      dataKey="value"
+                      strokeWidth={0}
+                    >
+                      {topLangs.map((_, i) => (
+                        <Cell
+                          key={i}
+                          fill={LANG_COLORS[i % LANG_COLORS.length]}
+                        />
+                      ))}
                     </Pie>
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="space-y-1 text-[12px]">
                   {topLangs.map(([lang], i) => (
                     <div key={lang} className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: LANG_COLORS[i % LANG_COLORS.length] }} />
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{
+                          backgroundColor: LANG_COLORS[i % LANG_COLORS.length],
+                        }}
+                      />
                       <span className="text-muted-foreground">{lang}</span>
                     </div>
                   ))}
@@ -224,19 +365,31 @@ export default function ProjectDetailPage() {
           {/* Git branches */}
           {branches.length > 0 && (
             <div className="border border-border rounded bg-card p-4">
-              <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Git Branches</h2>
+              <h2 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+                Git Branches
+              </h2>
               <div className="space-y-1.5 text-[13px]">
                 {branches.map(({ branch, turns }) => {
-                  const width = Math.max(4, Math.round((turns / maxBranchTurns) * 100))
+                  const width = Math.max(
+                    4,
+                    Math.round((turns / maxBranchTurns) * 100),
+                  );
                   return (
                     <div key={branch} className="flex items-center gap-2">
-                      <span className="text-muted-foreground/70 w-24 truncate text-[12px] font-mono">{branch}</span>
+                      <span className="text-muted-foreground/70 w-24 truncate text-[12px] font-mono">
+                        {branch}
+                      </span>
                       <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-[#34d399]/50" style={{ width: `${width}%` }} />
+                        <div
+                          className="h-full rounded-full bg-[#34d399]/50"
+                          style={{ width: `${width}%` }}
+                        />
                       </div>
-                      <span className="text-muted-foreground/50 text-[12px] w-12 text-right">{turns} turns</span>
+                      <span className="text-muted-foreground/50 text-[12px] w-12 text-right">
+                        {turns} turns
+                      </span>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -244,5 +397,5 @@ export default function ProjectDetailPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
