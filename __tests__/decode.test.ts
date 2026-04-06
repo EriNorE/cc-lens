@@ -46,6 +46,20 @@ describe("projectDisplayName", () => {
   it("handles trailing slash", () => {
     expect(projectDisplayName("/Users/foo/bar/")).toBe("bar");
   });
+
+  it("strips worktree suffix", () => {
+    expect(
+      projectDisplayName("/Users/itarun/mgmt-pve--claude-worktrees-elion"),
+    ).toBe("mgmt-pve");
+    expect(
+      projectDisplayName("/Users/itarun/mgmt-pve--claude-worktrees-solomon"),
+    ).toBe("mgmt-pve");
+  });
+
+  it("keeps non-worktree names intact", () => {
+    expect(projectDisplayName("/Users/itarun/cc-lens")).toBe("cc-lens");
+    expect(projectDisplayName("/Users/itarun/va-pentest")).toBe("va-pentest");
+  });
 });
 
 describe("projectShortPath", () => {
