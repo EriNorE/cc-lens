@@ -155,6 +155,7 @@ async function main() {
   const needsInstall = needsSetup && !hasModules;
 
   const isDev = process.argv.includes("--dev");
+  const noBrowser = process.argv.includes("--no-browser");
   const standaloneServer = path.join(
     CACHE_DIR,
     ".next",
@@ -268,8 +269,12 @@ async function main() {
   function checkReady(text) {
     if (!opened && /Local:|ready|started server/i.test(text)) {
       opened = true;
-      console.log(`\n  ${O}✓${R}  Opening ${B}${url}${R} in your browser…\n`);
-      openBrowser(url);
+      if (noBrowser) {
+        console.log(`\n  ${O}✓${R}  Ready at ${B}${url}${R}\n`);
+      } else {
+        console.log(`\n  ${O}✓${R}  Opening ${B}${url}${R} in your browser…\n`);
+        openBrowser(url);
+      }
     }
   }
 

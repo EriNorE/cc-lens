@@ -1,0 +1,17 @@
+[Unit]
+Description=CC-Lens — Claude Code Dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=<username>
+Group=<username>
+WorkingDirectory=/home/<username>/cc-lens
+Environment=NODE_ENV=production
+Environment=PATH=/home/<username>/.nvm/versions/node/<node-version>/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/home/<username>/.nvm/versions/node/<node-version>/bin/node bin/cli.js --no-browser
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
