@@ -2,6 +2,22 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.4.3] — 2026-04-06
+
+### Fixed
+
+- **Session oscillation root cause** — in-flight promise deduplication for `getSessions()`. All 9 concurrent API callers share one promise (100ms TTL), eliminating cache race condition (#70)
+- Silent catch-all in `readSessionsFromProjectJSONL` → always logs `console.error` (#68, #71)
+- E2E `waitForFunction` timeout 15s → 30s for cold start reliability (#68)
+- `firstSessionDate=""` → Invalid Date guard in overview (#62, #68)
+- Error messages: session ID and project slug routes now include "must not contain path separators or '..'" (#68, #71)
+- CSP: added `frame-ancestors 'none'` (#68)
+
+### Changed
+
+- `isValidSlug` exported from barrel — inline regex replaced in 3 routes (#68)
+- 4 new tests for getSessions oscillation prevention logic (tests: 109 → 113) (#68)
+
 ## [0.4.2] — 2026-04-06
 
 ### Fixed
