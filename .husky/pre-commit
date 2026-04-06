@@ -1,1 +1,2 @@
 npx lint-staged
+bash scripts/fitness-check.sh
