@@ -2,6 +2,13 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.7.1] — 2026-04-06
+
+### Changed
+
+- **Worktree grouping at API level** — projects with same display_name merged, all metrics aggregated (#135)
+- **Chart layout swapped** — project bar chart gets wide column, model donut fits narrow (#137)
+
 ## [0.7.0] — 2026-04-06
 
 ### Changed
