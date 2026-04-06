@@ -73,7 +73,12 @@ export async function GET() {
       ...periods,
       storageBytes,
       sessionCount: sessions.length,
-      firstSessionDate: sessions[sessions.length - 1]?.start_time ?? "",
+      // Use dailyActivity (merged stats-cache + JSONL) for earliest date —
+      // stats-cache may have older data than JSONL sessions alone
+      firstSessionDate:
+        dailyActivity.length > 0
+          ? dailyActivity[0].date
+          : (sessions[sessions.length - 1]?.start_time ?? ""),
     },
   });
 }
