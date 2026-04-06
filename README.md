@@ -121,6 +121,10 @@ Data auto-refreshes every 5 seconds while the dashboard is open.
 - **Charts**: [Recharts](https://recharts.org)
 - **Data Fetching**: [SWR](https://swr.vercel.app) with 5s polling
 
+## Security
+
+See [SECURITY.md](SECURITY.md) for responsible disclosure process and [docs/threat-model.md](docs/threat-model.md) for STRIDE threat analysis.
+
 ## License
 
 MIT
