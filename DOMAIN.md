@@ -84,3 +84,10 @@ Pre-computed by Claude Code, stored at `~/.claude/stats-cache.json`. Read-only f
 | claude-haiku-4-5         | $1.00     | $5.00      | $1.25           | $0.10          |
 
 Fuzzy matching: model strings with date suffixes (e.g., `claude-haiku-4-5-20251001`) match their prefix.
+
+## Security
+
+- **Security model**: TCP bind `127.0.0.1` (primary) + middleware 2-layer check (defense-in-depth)
+- **Input validation**: `isValidSlug()` on all slug/ID parameters, `path.resolve()` boundary check on memory writes
+- **Threat model**: [docs/threat-model.md](docs/threat-model.md) — STRIDE analysis covering 4 attack surfaces
+- **Disclosure**: [SECURITY.md](SECURITY.md) — responsible reporting process
