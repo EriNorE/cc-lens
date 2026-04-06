@@ -110,6 +110,24 @@ function syncSource(pkg) {
   }
 }
 
+/** Copy static assets into standalone dir — standalone doesn't include them */
+function copyStandaloneAssets() {
+  const standaloneDir = path.join(CACHE_DIR, ".next", "standalone");
+  if (!fs.existsSync(standaloneDir)) return;
+  // .next/static → standalone/.next/static
+  const staticSrc = path.join(CACHE_DIR, ".next", "static");
+  const staticDest = path.join(standaloneDir, ".next", "static");
+  if (fs.existsSync(staticSrc)) {
+    fs.cpSync(staticSrc, staticDest, { recursive: true });
+  }
+  // public/ → standalone/public/
+  const publicSrc = path.join(CACHE_DIR, "public");
+  const publicDest = path.join(standaloneDir, "public");
+  if (fs.existsSync(publicSrc)) {
+    fs.cpSync(publicSrc, publicDest, { recursive: true });
+  }
+}
+
 async function main() {
   printBanner();
 
@@ -137,8 +155,13 @@ async function main() {
   const needsInstall = needsSetup && !hasModules;
 
   const isDev = process.argv.includes("--dev");
-  const buildMarker = path.join(CACHE_DIR, ".next", "BUILD_ID");
-  const hasBuild = fs.existsSync(buildMarker);
+  const standaloneServer = path.join(
+    CACHE_DIR,
+    ".next",
+    "standalone",
+    "server.js",
+  );
+  const hasBuild = fs.existsSync(standaloneServer);
 
   if (needsSetup) {
     // Copy all source files into ~/.cc-lens/ so Next.js runs entirely within
@@ -178,6 +201,7 @@ async function main() {
             : reject(new Error(`next build failed (exit ${code})`)),
         );
       });
+      copyStandaloneAssets();
     }
 
     fs.writeFileSync(versionFile, pkg.version);
@@ -196,6 +220,7 @@ async function main() {
           : reject(new Error(`next build failed (exit ${code})`)),
       );
     });
+    copyStandaloneAssets();
   }
 
   const port = await findFreePort(
@@ -209,26 +234,34 @@ async function main() {
       `  \x1b[33m⚠  WARNING: binding to ${host} — dashboard accessible on network\x1b[0m\n`,
     );
   }
-  const mode = isDev ? "dev" : "start";
+  const useStandalone = !isDev && fs.existsSync(standaloneServer);
   console.log(
-    `  ${DIM}Starting server on${R} ${O2}${B}${url}${R}${isDev ? ` ${DIM}(dev mode)${R}` : ""}\n`,
+    `  ${DIM}Starting server on${R} ${O2}${B}${url}${R}${isDev ? ` ${DIM}(dev mode)${R}` : useStandalone ? ` ${DIM}(standalone)${R}` : ""}\n`,
   );
 
   // On Windows, mixing 'inherit' + 'pipe' in stdio causes EINVAL. Use 'ignore'
-  // for stdin — Next.js server doesn't need user input from stdin.
-  const child = spawn(
-    process.execPath,
-    [nextCli, mode, "--port", String(port), "--hostname", host],
-    {
-      cwd: CACHE_DIR,
-      stdio: [
-        process.platform === "win32" ? "ignore" : "inherit",
-        "pipe",
-        "pipe",
-      ],
-      env: { ...process.env, PORT: String(port) },
-    },
-  );
+  // for stdin — server doesn't need user input from stdin.
+  const stdioCfg = [
+    process.platform === "win32" ? "ignore" : "inherit",
+    "pipe",
+    "pipe",
+  ];
+
+  const child = useStandalone
+    ? spawn(process.execPath, [standaloneServer], {
+        cwd: path.join(CACHE_DIR, ".next", "standalone"),
+        stdio: stdioCfg,
+        env: { ...process.env, PORT: String(port), HOSTNAME: host },
+      })
+    : spawn(
+        process.execPath,
+        [nextCli, "dev", "--port", String(port), "--hostname", host],
+        {
+          cwd: CACHE_DIR,
+          stdio: stdioCfg,
+          env: { ...process.env, PORT: String(port) },
+        },
+      );
 
   let opened = false;
 
