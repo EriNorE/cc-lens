@@ -3,12 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { mutate } from "swr";
-import { Star } from "lucide-react";
+import { Star, ChevronRight } from "lucide-react";
+import Link from "next/link";
+
+interface Breadcrumb {
+  label: string;
+  href: string;
+}
 
 interface TopBarProps {
   title: string;
   subtitle?: string;
   showStarButton?: boolean;
+  breadcrumbs?: Breadcrumb[];
 }
 
 const GITHUB_REPO = "https://github.com/pitimon/cc-lens";
@@ -28,6 +35,7 @@ export function TopBar({
   title,
   subtitle,
   showStarButton = false,
+  breadcrumbs,
 }: TopBarProps) {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
@@ -52,6 +60,26 @@ export function TopBar({
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur px-4 md:px-8 py-4 md:py-5 flex items-start justify-between">
       <div className="space-y-1">
+        {breadcrumbs && breadcrumbs.length > 0 && (
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-1 text-[12px] font-mono text-muted-foreground/60 pl-6 mb-0.5"
+          >
+            {breadcrumbs.map((crumb, i) => (
+              <span key={crumb.href} className="flex items-center gap-1">
+                {i > 0 && <ChevronRight className="w-3 h-3" />}
+                <Link
+                  href={crumb.href}
+                  className="hover:text-foreground transition-colors"
+                >
+                  {crumb.label}
+                </Link>
+              </span>
+            ))}
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-muted-foreground">{title}</span>
+          </nav>
+        )}
         <div className="flex items-center gap-2.5">
           <span className="text-primary text-lg leading-none">●</span>
           <h1 className="text-lg font-bold text-foreground tracking-tight font-mono">
