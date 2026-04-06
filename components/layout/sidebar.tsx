@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import pkg from "../../package.json";
 import {
   Moon,
   Sun,
@@ -159,9 +160,14 @@ export function Sidebar() {
 
       <div className="px-3 py-4 border-t border-sidebar-border flex items-center justify-between">
         {!collapsed && (
-          <p className="text-sm text-sidebar-foreground/50 font-mono">
-            Made by pitimon
-          </p>
+          <div className="space-y-0.5">
+            <p className="text-sm text-sidebar-foreground/50 font-mono">
+              Made by pitimon
+            </p>
+            <p className="text-[10px] text-sidebar-foreground/30 font-mono">
+              v{pkg.version}
+            </p>
+          </div>
         )}
         <button
           onClick={toggle}
