@@ -29,5 +29,8 @@ jobs:
       - name: Test + Coverage
         run: npx vitest run --reporter=verbose --coverage
 
+      - name: Fitness check
+        run: bash scripts/fitness-check.sh
+
       - name: Build
         run: npm run build
