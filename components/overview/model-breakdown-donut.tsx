@@ -8,11 +8,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import type { ModelUsage } from "@/types/claude";
 import { formatTokens } from "@/lib/decode";
 
 interface Props {
-  modelUsage: Record<string, ModelUsage>;
+  modelUsage: Record<string, { inputTokens: number; outputTokens: number }>;
 }
 
 const MODEL_COLORS = [

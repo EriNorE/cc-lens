@@ -138,6 +138,21 @@ export function OverviewClient() {
   const projects = projectsData?.projects ?? [];
   const projectCount = projects.length;
 
+  // Compute model usage from JSONL sessions (not stats-cache) to exclude retired models
+  const sessionModelUsage = useMemo(() => {
+    const usage: Record<string, { inputTokens: number; outputTokens: number }> =
+      {};
+    for (const s of sessions) {
+      if (!s.model) continue;
+      const existing = usage[s.model] ?? { inputTokens: 0, outputTokens: 0 };
+      usage[s.model] = {
+        inputTokens: existing.inputTokens + (s.input_tokens ?? 0),
+        outputTokens: existing.outputTokens + (s.output_tokens ?? 0),
+      };
+    }
+    return usage;
+  }, [sessions]);
+
   const chartDays = useMemo(() => {
     if (!dateFrom || !dateTo) return 90;
     try {
@@ -283,7 +298,7 @@ export function OverviewClient() {
           icon={<PieChart className="w-4 h-4" />}
           title="Model distribution"
         >
-          <ModelBreakdownDonut modelUsage={stats.modelUsage} />
+          <ModelBreakdownDonut modelUsage={sessionModelUsage} />
         </ChartCard>
       </div>
 
