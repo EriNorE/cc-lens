@@ -136,6 +136,10 @@ async function main() {
   const needsSetup = cachedVersion !== pkg.version || !fs.existsSync(nextCli);
   const needsInstall = needsSetup && !hasModules;
 
+  const isDev = process.argv.includes("--dev");
+  const buildMarker = path.join(CACHE_DIR, ".next", "BUILD_ID");
+  const hasBuild = fs.existsSync(buildMarker);
+
   if (needsSetup) {
     // Copy all source files into ~/.cc-lens/ so Next.js runs entirely within
     // that directory — no symlinks, no Turbopack root violations.
@@ -159,7 +163,39 @@ async function main() {
       console.log(`  ${DIM}Updating source files…${R}\n`);
     }
 
+    // Build for production (one-time per version, ~30-60s)
+    if (!isDev) {
+      console.log(`  ${DIM}Building for production…${R}\n`);
+      await new Promise((resolve, reject) => {
+        const build = spawn("npx", ["next", "build"], {
+          cwd: CACHE_DIR,
+          stdio: "inherit",
+          shell: true,
+        });
+        build.on("exit", (code) =>
+          code === 0
+            ? resolve()
+            : reject(new Error(`next build failed (exit ${code})`)),
+        );
+      });
+    }
+
     fs.writeFileSync(versionFile, pkg.version);
+  } else if (!isDev && !hasBuild) {
+    // Source already synced but no production build exists (e.g. previously ran with --dev)
+    console.log(`  ${DIM}Building for production…${R}\n`);
+    await new Promise((resolve, reject) => {
+      const build = spawn("npx", ["next", "build"], {
+        cwd: CACHE_DIR,
+        stdio: "inherit",
+        shell: true,
+      });
+      build.on("exit", (code) =>
+        code === 0
+          ? resolve()
+          : reject(new Error(`next build failed (exit ${code})`)),
+      );
+    });
   }
 
   const port = await findFreePort(
@@ -173,13 +209,16 @@ async function main() {
       `  \x1b[33m⚠  WARNING: binding to ${host} — dashboard accessible on network\x1b[0m\n`,
     );
   }
-  console.log(`  ${DIM}Starting server on${R} ${O2}${B}${url}${R}\n`);
+  const mode = isDev ? "dev" : "start";
+  console.log(
+    `  ${DIM}Starting server on${R} ${O2}${B}${url}${R}${isDev ? ` ${DIM}(dev mode)${R}` : ""}\n`,
+  );
 
   // On Windows, mixing 'inherit' + 'pipe' in stdio causes EINVAL. Use 'ignore'
-  // for stdin — Next.js dev server doesn't need user input from stdin.
+  // for stdin — Next.js server doesn't need user input from stdin.
   const child = spawn(
     process.execPath,
-    [nextCli, "dev", "--port", String(port), "--hostname", host],
+    [nextCli, mode, "--port", String(port), "--hostname", host],
     {
       cwd: CACHE_DIR,
       stdio: [
