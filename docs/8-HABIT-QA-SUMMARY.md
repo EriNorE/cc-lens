@@ -120,3 +120,8 @@ Score dipped at rounds 3 and 5 because deeper scanning uncovered more issues —
 ---
 
 _QA performed by Claude Code (Opus 4.6) with 8-Habit AI Dev framework_
+
+## External Knowledge Sharing
+
+- [Architecture Talk (YouTube)](https://www.youtube.com/watch?v=9bG1WyOpLFM) — cc-lens architecture, 8-Habit development process, and QA journey
+- [Demo Video (YouTube)](https://www.youtube.com/watch?v=F01R99FeB5U) — dashboard walkthrough

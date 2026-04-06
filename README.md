@@ -16,6 +16,7 @@ Zero cloud. Zero telemetry. Your data never leaves your machine.
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 [![Demo Video](https://img.shields.io/badge/Demo-YouTube-red?logo=youtube)](https://www.youtube.com/watch?v=F01R99FeB5U)
+[![Architecture Talk](https://img.shields.io/badge/Architecture-YouTube-red?logo=youtube)](https://www.youtube.com/watch?v=9bG1WyOpLFM)
 
 </div>
 
