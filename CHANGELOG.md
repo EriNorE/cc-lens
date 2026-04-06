@@ -2,6 +2,22 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.5.0] — 2026-04-06
+
+### Changed
+
+- **Standalone output mode** — `output: "standalone"` generates minimal `server.js` with only required deps bundled (#81)
+  - RAM: ~1,047 MB → ~300 MB (3.5x reduction)
+  - CPU idle: ~100% → ~15% (Next.js 15-16 regression mitigated)
+  - Disk: 531 MB → ~100 MB (node_modules no longer needed at runtime)
+  - `optimizePackageImports` for recharts, lucide-react, date-fns
+  - `webpackMemoryOptimizations` enabled
+  - Static assets (`public/`, `.next/static/`) copied into standalone post-build
+  - Graceful fallback to `next dev` if standalone unavailable
+- **CLI production mode** — `next build` + standalone `server.js` instead of `next dev` (#78)
+  - Build once per version (~30-60s), then instant start on subsequent runs
+  - `--dev` flag for contributors who need HMR
+
 ## [0.4.4] — 2026-04-06
 
 ### Changed
