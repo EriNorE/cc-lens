@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { MainContent } from "@/components/layout/main-content";
 import { ThemeProvider } from "@/components/theme-provider";
+import { WelcomeOverlay } from "@/components/onboarding/welcome-overlay";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -47,6 +48,7 @@ export default function RootLayout({
             <MainContent>{children}</MainContent>
           </div>
           <BottomNav />
+          <WelcomeOverlay />
         </ThemeProvider>
       </body>
     </html>
