@@ -51,16 +51,22 @@ export function setCachedEntry(
   mtimeMs: number,
   sizeBytes: number,
   meta: SessionMeta,
-): void {
-  cache.entries[filePath] = { mtimeMs, sizeBytes, meta };
+): CacheData {
+  return {
+    ...cache,
+    entries: { ...cache.entries, [filePath]: { mtimeMs, sizeBytes, meta } },
+  };
 }
 
-export function pruneCache(cache: CacheData, validPaths: Set<string>): void {
-  for (const key of Object.keys(cache.entries)) {
-    if (!validPaths.has(key)) {
-      delete cache.entries[key];
-    }
+export function pruneCache(
+  cache: CacheData,
+  validPaths: Set<string>,
+): CacheData {
+  const entries: Record<string, CacheEntry> = {};
+  for (const [key, value] of Object.entries(cache.entries)) {
+    if (validPaths.has(key)) entries[key] = value;
   }
+  return { ...cache, entries };
 }
 
 // ─── Project Path Cache ─────────────────────────────────────────────────────
@@ -103,6 +109,6 @@ export function setCachedProjectPath(
   cache: ProjectPathCache,
   slug: string,
   projectPath: string,
-): void {
-  cache.paths[slug] = projectPath;
+): ProjectPathCache {
+  return { ...cache, paths: { ...cache.paths, [slug]: projectPath } };
 }
