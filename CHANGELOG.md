@@ -2,6 +2,23 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.5.2] — 2026-04-06
+
+### Added
+
+- **Chaos tests** for corrupted/malformed JSONL — empty, 50% bad lines, missing fields, binary garbage (#93)
+- **Governance fitness functions** — `scripts/fitness-check.sh` checks file size, secrets, console.log; runs in pre-commit + CI (#94)
+- **Health architecture dashboard** — `/api/health` returns maxFileLines, testCount, readerModuleCount, apiRouteCount (#95)
+- **Welcome onboarding overlay** — first-time users see what cc-lens does and where data comes from (#97)
+- **Accessibility docs** — `docs/accessibility.md` with WCAG 2.1 Level A status and `@axe-core/playwright` installed (#99)
+- **SECURITY.md** — responsible disclosure process with 48h/7d/30d SLA (#100)
+- **STRIDE threat model** — `docs/threat-model.md` covering 4 attack surfaces, 15 mitigations, 5 residual risks (#98)
+
+### Changed
+
+- Tests: 113 → 119 (+6 chaos tests)
+- Whole Person Score: Body 4→5, Mind 4→5, Heart 4→5, Spirit 3→5
+
 ## [0.5.0] — 2026-04-06
 
 ### Changed
