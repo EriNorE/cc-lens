@@ -8,6 +8,13 @@ import { fileURLToPath } from "url";
 const packageRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  productionBrowserSourceMaps: false,
+  experimental: {
+    serverSourceMaps: false,
+    webpackMemoryOptimizations: true,
+    optimizePackageImports: ["recharts", "lucide-react", "date-fns"],
+  },
   turbopack: {
     root: packageRoot,
   },
