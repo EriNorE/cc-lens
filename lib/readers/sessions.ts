@@ -38,7 +38,17 @@ async function processFile(
       projectPath,
       slug,
     );
-    if (meta) setCachedEntry(cache, filePath, stat.mtimeMs, stat.size, meta);
+    if (meta) {
+      // Mutate in-place for batch processing context (promise dedup prevents races)
+      const updated = setCachedEntry(
+        cache,
+        filePath,
+        stat.mtimeMs,
+        stat.size,
+        meta,
+      );
+      Object.assign(cache, updated);
+    }
     return meta;
   } catch {
     return null; // Expected: file may be unreadable
@@ -211,7 +221,10 @@ export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
         const cached = getCachedProjectPath(pathCache, slug);
         if (cached) return cached;
         const resolved = await resolveProjectPath(slug);
-        setCachedProjectPath(pathCache, slug, resolved);
+        Object.assign(
+          pathCache,
+          setCachedProjectPath(pathCache, slug, resolved),
+        );
         return resolved;
       }),
     );
@@ -241,8 +254,11 @@ export async function readSessionsFromProjectJSONL(): Promise<SessionMeta[]> {
       }
     }
 
-    pruneCache(cache, validPaths);
-    await Promise.all([writeCache(cache), writeProjectPathCache(pathCache)]);
+    const prunedCache = pruneCache(cache, validPaths);
+    await Promise.all([
+      writeCache(prunedCache),
+      writeProjectPathCache(pathCache),
+    ]);
 
     // Deduplicate sessions by ID — keep the one with the latest start_time
     const seen = new Map<string, SessionMeta>();
