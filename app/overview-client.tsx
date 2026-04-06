@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import useSWR from "swr";
+import Link from "next/link";
 import { BarChart3, PieChart } from "lucide-react";
 import { UsageOverTimeChart } from "@/components/overview/usage-over-time-chart";
 import { ModelBreakdownDonut } from "@/components/overview/model-breakdown-donut";
@@ -349,12 +350,12 @@ export function OverviewClient() {
         <span className="text-[13px] text-muted-foreground font-mono">
           {sessions.length} recent conversations
         </span>
-        <a
+        <Link
           href="/sessions"
           className="text-[13px] font-mono text-primary hover:text-primary/80 transition-colors"
         >
           View all sessions &rarr;
-        </a>
+        </Link>
       </div>
     </div>
   );
