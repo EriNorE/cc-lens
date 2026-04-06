@@ -6,7 +6,7 @@ import Link from "next/link";
 import { BarChart3, PieChart } from "lucide-react";
 import { UsageOverTimeChart } from "@/components/overview/usage-over-time-chart";
 import { ModelBreakdownDonut } from "@/components/overview/model-breakdown-donut";
-import { ProjectActivityDonut } from "@/components/overview/project-activity-donut";
+import { ProjectActivityChart } from "@/components/overview/project-activity-chart";
 import { PeakHoursChart } from "@/components/overview/peak-hours-chart";
 import { OverviewConversationTable } from "@/components/overview/conversation-table";
 import { formatTokens, formatBytes } from "@/lib/decode";
@@ -283,7 +283,7 @@ export function OverviewClient() {
           icon={<PieChart className="w-4 h-4" />}
           title="Project activity distribution"
         >
-          <ProjectActivityDonut projects={projects} />
+          <ProjectActivityChart projects={projects} />
         </ChartCard>
       </div>
 
