@@ -15,10 +15,10 @@ import { filterDailyByWindow } from "@/lib/costs-compute";
 import type { DailyCost, HourlyCost } from "@/types/claude";
 
 const MODEL_COLORS: Record<string, string> = {
-  "claude-opus-4-6": "#d97706",
-  "claude-opus-4-5-20251101": "#a78bfa",
-  "claude-sonnet-4-6": "#60a5fa",
-  "claude-haiku-4-5": "#34d399",
+  "claude-opus-4-6": "var(--chart-1)",
+  "claude-opus-4-5-20251101": "var(--chart-4)",
+  "claude-sonnet-4-6": "var(--chart-3)",
+  "claude-haiku-4-5": "var(--chart-2)",
 };
 
 function colorForModel(m: string): string {
@@ -110,51 +110,53 @@ export function CostOverTimeChart({
           No data for this period
         </p>
       ) : (
-        <div role="img" aria-label="Cost over time chart"><ResponsiveContainer width="100%" height={200}>
-          <AreaChart
-            data={data}
-            margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis
-              dataKey={xKey}
-              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-              tickLine={false}
-              axisLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(v) => `$${v.toFixed(2)}`}
-              width={48}
-            />
-            <Tooltip
-              contentStyle={{
-                background: "var(--card)",
-                border: "1px solid var(--border)",
-                borderRadius: 4,
-                fontSize: 12,
-              }}
-              formatter={(val: number | undefined, name?: string) => [
-                formatCost(val ?? 0),
-                shortModel(name ?? ""),
-              ]}
-            />
-            {models.map((m) => (
-              <Area
-                key={m}
-                type="monotone"
-                dataKey={m}
-                stackId="1"
-                stroke={colorForModel(m)}
-                fill={colorForModel(m) + "30"}
-                strokeWidth={1.5}
+        <div role="img" aria-label="Cost over time chart">
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart
+              data={data}
+              margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis
+                dataKey={xKey}
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                tickLine={false}
+                axisLine={false}
+                interval="preserveStartEnd"
               />
-            ))}
-          </AreaChart>
-        </ResponsiveContainer></div>
+              <YAxis
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => `$${v.toFixed(2)}`}
+                width={48}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "var(--card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 4,
+                  fontSize: 12,
+                }}
+                formatter={(val: number | undefined, name?: string) => [
+                  formatCost(val ?? 0),
+                  shortModel(name ?? ""),
+                ]}
+              />
+              {models.map((m) => (
+                <Area
+                  key={m}
+                  type="monotone"
+                  dataKey={m}
+                  stackId="1"
+                  stroke={colorForModel(m)}
+                  fill={colorForModel(m) + "30"}
+                  strokeWidth={1.5}
+                />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   );

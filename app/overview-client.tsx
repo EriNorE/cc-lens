@@ -181,19 +181,27 @@ export function OverviewClient() {
     computed.totalCacheReadTokens + computed.totalCacheWriteTokens;
 
   const ioSegs = [
-    { label: "input", value: computed.totalInputTokens, color: "#60a5fa" },
-    { label: "output", value: computed.totalOutputTokens, color: "#d97706" },
+    {
+      label: "input",
+      value: computed.totalInputTokens,
+      color: "var(--chart-3)",
+    },
+    {
+      label: "output",
+      value: computed.totalOutputTokens,
+      color: "var(--chart-1)",
+    },
   ];
   const cacheSegs = [
     {
       label: "cache_read",
       value: computed.totalCacheReadTokens,
-      color: "#34d399",
+      color: "var(--chart-2)",
     },
     {
       label: "cache_write",
       value: computed.totalCacheWriteTokens,
-      color: "#a78bfa",
+      color: "var(--chart-4)",
     },
   ];
   const tokenSegs = [...ioSegs, ...cacheSegs];
