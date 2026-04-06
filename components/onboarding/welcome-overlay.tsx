@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const STORAGE_KEY = "cc-lens-onboarded";
 
-export function WelcomeOverlay() {
-  const [show, setShow] = useState(false);
+function isFirstVisit(): boolean {
+  try {
+    return !localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return false;
+  }
+}
 
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) setShow(true);
-    } catch {
-      /* localStorage unavailable — skip overlay */
-    }
-  }, []);
+export function WelcomeOverlay() {
+  const [show, setShow] = useState(isFirstVisit);
 
   if (!show) return null;
 
