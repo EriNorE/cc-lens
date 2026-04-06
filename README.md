@@ -4,7 +4,7 @@
 
 # cc-lens
 
-**Local-first analytics dashboard for [Claude Code](https://docs.anthropic.com/en/docs/claude-code)**
+**A real-time monitoring dashboard for [Claude Code](https://docs.anthropic.com/en/docs/claude-code)**
 
 Visualize your token usage, costs, sessions, and projects — all from `~/.claude/`.\
 Zero cloud. Zero telemetry. Your data never leaves your machine.
@@ -14,6 +14,8 @@ Zero cloud. Zero telemetry. Your data never leaves your machine.
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+[![Demo Video](https://img.shields.io/badge/Demo-YouTube-red?logo=youtube)](https://www.youtube.com/watch?v=F01R99FeB5U)
 
 </div>
 
