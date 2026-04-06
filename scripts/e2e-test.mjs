@@ -8,6 +8,7 @@
  */
 
 import { chromium } from "playwright";
+import AxeBuilder from "@axe-core/playwright";
 
 const PORT = process.argv.includes("--port")
   ? process.argv[process.argv.indexOf("--port") + 1]
@@ -84,6 +85,16 @@ try {
     // Should show M (millions) not B (billions) for token count
     if (text.includes("16.9B"))
       throw new Error("Token count still shows inflated 16.9B");
+  });
+
+  await test("no critical a11y violations (axe-core)", async () => {
+    const results = await new AxeBuilder({ page: overview }).analyze();
+    const critical = results.violations.filter((v) => v.impact === "critical");
+    if (critical.length > 0) {
+      throw new Error(
+        `${critical.length} critical a11y violations: ${critical.map((v) => v.id).join(", ")}`,
+      );
+    }
   });
 
   await test("Star on GitHub links to pitimon/cc-lens", async () => {
