@@ -9,7 +9,7 @@
 Visualize your token usage, costs, sessions, and projects — all from `~/.claude/`.\
 Zero cloud. Zero telemetry. Your data never leaves your machine.
 
-[![Version](https://img.shields.io/badge/version-0.4.4-orange)](https://github.com/pitimon/cc-lens/releases/tag/v0.4.4)
+[![Version](https://img.shields.io/badge/version-0.5.0-orange)](https://github.com/pitimon/cc-lens/releases/tag/v0.5.0)
 [![CI](https://github.com/pitimon/cc-lens/actions/workflows/ci.yml/badge.svg)](https://github.com/pitimon/cc-lens/actions/workflows/ci.yml)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
