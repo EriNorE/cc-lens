@@ -64,7 +64,7 @@ export function ProjectActivityDonut({ projects }: Props) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
+    <div role="img" aria-label="Project activity chart"><ResponsiveContainer width="100%" height={220}>
       <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
         <Pie
           data={data}
@@ -90,6 +90,6 @@ export function ProjectActivityDonut({ projects }: Props) {
           )}
         />
       </PieChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></div>
   )
 }

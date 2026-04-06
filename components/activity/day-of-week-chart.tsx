@@ -11,7 +11,7 @@ export function DayOfWeekChart({ data }: Props) {
   return (
     <div>
       <h3 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Day of Week</h3>
-      <ResponsiveContainer width="100%" height={140}>
+      <div role="img" aria-label="Day of week activity chart"><ResponsiveContainer width="100%" height={140}>
         <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis dataKey="day" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} tickLine={false} axisLine={false} />
@@ -29,7 +29,7 @@ export function DayOfWeekChart({ data }: Props) {
             ))}
           </Bar>
         </BarChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer></div>
     </div>
   )
 }

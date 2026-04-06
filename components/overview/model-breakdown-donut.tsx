@@ -64,7 +64,7 @@ export function ModelBreakdownDonut({ modelUsage }: Props) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
+    <div role="img" aria-label="Model distribution chart"><ResponsiveContainer width="100%" height={220}>
       <PieChart>
         <Pie
           data={data}
@@ -90,6 +90,6 @@ export function ModelBreakdownDonut({ modelUsage }: Props) {
           )}
         />
       </PieChart>
-    </ResponsiveContainer>
+    </ResponsiveContainer></div>
   )
 }

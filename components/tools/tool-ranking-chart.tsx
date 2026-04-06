@@ -16,7 +16,7 @@ export function ToolRankingChart({ tools }: Props) {
       <h3 className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
         Tool Usage — Ranked by Total Calls
       </h3>
-      <ResponsiveContainer width="100%" height={Math.max(200, top.length * 26)}>
+      <div role="img" aria-label="Tool usage ranking chart"><ResponsiveContainer width="100%" height={Math.max(200, top.length * 26)}>
         <BarChart data={top} layout="vertical" margin={{ top: 0, right: 60, bottom: 0, left: 8 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
           <XAxis
@@ -50,7 +50,7 @@ export function ToolRankingChart({ tools }: Props) {
             ))}
           </Bar>
         </BarChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer></div>
     </div>
   )
 }

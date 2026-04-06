@@ -29,6 +29,7 @@ export default function ExportPage() {
   const [importError, setImportError] = useState("");
   const [importLoading, setImportLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [excludePrompts, setExcludePrompts] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleExport() {
@@ -40,6 +41,7 @@ export default function ExportPage() {
           from: dateFrom || undefined,
           to: dateTo || undefined,
         };
+      if (excludePrompts) body.excludePrompts = true;
 
       const res = await fetch("/api/export", {
         method: "POST",
@@ -83,7 +85,7 @@ export default function ExportPage() {
       const diff = (await res.json()) as ImportDiff;
       setImportDiff(diff);
     } catch (e) {
-      setImportError(String(e));
+      setImportError("Import failed. Check file format.");
     } finally {
       setImportLoading(false);
     }
@@ -116,6 +118,15 @@ export default function ExportPage() {
                 This export contains your prompt text (first_prompt field).
                 Treat the exported file as sensitive data.
               </p>
+              <label className="flex items-center gap-2 text-[12px] text-muted-foreground mb-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={excludePrompts}
+                  onChange={(e) => setExcludePrompts(e.target.checked)}
+                  className="rounded border-border"
+                />
+                Exclude prompt text from export
+              </label>
             </div>
 
             <div className="flex gap-3 items-end">
