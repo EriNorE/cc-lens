@@ -2,6 +2,13 @@
 
 All notable changes to cc-lens are documented here. This project follows [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.7.2] — 2026-04-06
+
+### Fixed
+
+- **Model donut uses JSONL sessions** — excludes retired models (Haiku 4.5, Opus 4.5) that had zero active sessions (#140)
+- **Filter `<synthetic>` model** — internal Anthropic model from memory observer excluded from donut (#142)
+
 ## [0.7.1] — 2026-04-06
 
 ### Changed
